@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trips by Horse — first-letter variants</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Georgia', serif; background: #1a1a1a; color: #e0e0e0; padding: 1rem; margin: 0; }
+    h1 { font-size: 1.2rem; color: #fff; margin-bottom: 0.5rem; }
+    .intro { font-size: 0.9rem; color: #888; margin-bottom: 1.5rem; }
+    section { margin-bottom: 2rem; }
+    section h2 { font-size: 1rem; color: #f0c050; margin-bottom: 0.5rem; border-bottom: 1px solid #444; padding-bottom: 4px; }
+    .grid-box { background: #252525; border: 1px solid #444; border-radius: 6px; padding: 10px 14px; display: inline-block; margin: 4px 0; }
+    .grid-box pre { margin: 0; font-family: 'Courier New', monospace; font-size: 13px; color: #f0c050; letter-spacing: 0.05em; }
+    .site-title { margin-bottom: 1rem; }
+    .site-title a { color: #f0c050; text-decoration: none; font-weight: bold; }
+    .site-title a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <p class="site-title"><a href="index.html">&larr; ROAMY STUPID</a></p>
+  <h1>Trips by Horse — first-letter variants</h1>
+  <p class="intro">Nine 12-letter horse words (one per location). This page only shows things derived from the <strong>first letter</strong> of each word.</p>
+  <div id="output"></div>
+
+  <script>
+    const words = [
+      "ABERUNCATORS",
+      "DEAMBULATORY",
+      "FISSICOSTATE",
+      "LACHRYMIFORM",
+      "LAEVODUCTION",
+      "OLERICULTURE",
+      "SCAFFMASTERS",
+      "UNDERBRIDGES",
+      "WINDCHEATERS"
+    ];
+
+    const R = words.length, C = 12;
+    const grid = words.map(w => w.substring(0, 12).split(""));
+
+    function pos(c) { return c ? (c.charCodeAt(0) - 65 + 1) : 0; }
+    function rot(c, n) {
+      if (!c || c < "A" || c > "Z") return c;
+      return String.fromCharCode(((c.charCodeAt(0) - 65 + n) % 26 + 26) % 26 + 65);
+    }
+
+    const out = document.getElementById("output");
+
+    function add(title, body) {
+      const sec = document.createElement("section");
+      sec.innerHTML = "<h2>" + title + "</h2>" + body;
+      out.appendChild(sec);
+    }
+
+    function pre(t) {
+      return '<div class="grid-box"><pre>' +
+        t.replace(/</g, "&lt;").replace(/>/g, "&gt;") +
+        "</pre></div>";
+    }
+
+    // First letters per horse word
+    const first = grid.map(r => r[0]).join(""); // 9-letter string
+
+    // 1. First letters and A1Z26 positions
+    add("1. First letters (one per horse word)", pre(
+      first +
+      "\n  → " +
+      first.split("").map(c => pos(c)).join(",")
+    ));
+
+    // 2. First letters with ROT13
+    add("2. First letters with ROT13", pre(
+      first +
+      "\n" +
+      first.split("").map(c => rot(c, 13)).join("")
+    ));
+
+    // 3. Cumulative A1Z26 (running sum mod 26)
+    let running = [];
+    let acc = 0;
+    for (const c of first.split("")) {
+      acc += pos(c);
+      running.push(acc % 26 || 26);
+    }
+    add("3. Cumulative A1Z26 of first letters (mod 26)", pre(
+      first +
+      "\n  → " +
+      running.join(",")
+    ));
+
+    // 4. First+last letter of each horse word (still first-letter–anchored)
+    const firstLast = grid.map(r => r[0] + r[11]).join(" ");
+    add("4. First+last letter of each horse word", pre(firstLast));
+  </script>
+</body>
+</html>
+

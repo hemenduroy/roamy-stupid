@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Combined Trip — Shortest time route (40 cities)</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #1a1a1a; color: #e0e0e0; }
+    .site-title { padding: 10px 16px; background: #1a1a1a; border-bottom: 1px solid #333; }
+    .site-title a { color: #f0c050; text-decoration: none; font-weight: bold; font-size: 1rem; }
+    .site-title a:hover { text-decoration: underline; }
+    .layout { display: flex; height: calc(100vh - 42px); }
+    .sidebar { width: 460px; min-width: 340px; background: #1a1a1a; border-right: 1px solid #333; overflow-y: auto; padding: 12px; flex-shrink: 0; }
+    .sidebar h2 { font-size: 1rem; color: #f0c050; margin-bottom: 6px; }
+    .total-bar { background: #252525; border: 1px solid #444; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 13px; }
+    .total-bar b { color: #f0c050; }
+    table.route { border-collapse: collapse; font-size: 11px; width: 100%; }
+    table.route th { text-align: left; color: #666; border-bottom: 1px solid #444; padding: 3px 5px; font-weight: normal; }
+    table.route td { padding: 3px 5px; border-bottom: 1px solid #2a2a2a; }
+    .route-num { font-weight: bold; width: 24px; text-align: center; }
+    .route-city { color: #7dd3fc; cursor: pointer; font-size: 11px; }
+    .route-city:hover { text-decoration: underline; }
+    .route-word { color: #888; font-family: 'Courier New', monospace; }
+    .route-mode { font-weight: bold; font-size: 10px; }
+    .mode-car   { color: #3cb44b; }
+    .mode-horse { color: #ffe119; }
+    .mode-plane { color: #e6194b; }
+    .route-time { color: #aaa; text-align: right; font-variant-numeric: tabular-nums; }
+    .route-dist { color: #666; text-align: right; font-variant-numeric: tabular-nums; }
+    .legend { font-size: 11px; color: #888; margin-bottom: 10px; }
+    .legend span { margin-right: 10px; }
+    .extract-box { background: #252525; border: 1px solid #444; border-radius: 6px; padding: 8px 12px; margin-top: 10px; }
+    .extract-box pre { margin: 0; font-family: 'Courier New', monospace; font-size: 12px; color: #f0c050; white-space: pre-wrap; }
+    .extract-label { color: #888; font-size: 11px; margin-top: 8px; }
+    #map { flex: 1; }
+    .controls { margin-bottom: 8px; }
+    .controls label { font-size: 12px; color: #aaa; margin-right: 10px; }
+    .controls input { width: 55px; background: #252525; color: #e0e0e0; border: 1px solid #444; border-radius: 4px; padding: 3px 5px; font-size: 12px; text-align: right; }
+    .controls button { padding: 4px 12px; background: #333; color: #f0c050; border: 1px solid #555; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 6px; }
+    .controls button:hover { background: #444; }
+    .note { font-size: 11px; color: #666; margin-bottom: 8px; line-height: 1.5; }
+    .unreachable-box { background: #2a1a1a; border: 1px solid #5a2727; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: 12px; }
+    .unreachable-box b { color: #e89a9a; }
+    .unreachable-box .city { color: #7dd3fc; }
+  </style>
+</head>
+<body>
+  <p class="site-title"><a href="index.html">&larr; ROAMY STUPID</a></p>
+  <div class="layout">
+    <div class="sidebar">
+      <h2>Combined Trip — 40 cities</h2>
+      <div class="note">
+        <b>Rules:</b> Must arrive at car cities by car, horse cities by horse, plane cities by plane.
+        Car and horse <b>cannot cross water</b>. Plane can go anywhere.
+        To reach car/horse cities on another landmass, fly to a plane city on that landmass first, then drive/ride.
+      </div>
+      <div class="controls">
+        <label>Car <input type="number" id="speedCar" value="80" min="1"> km/h</label>
+        <label>Horse <input type="number" id="speedHorse" value="30" min="1"> km/h</label>
+        <label>Plane <input type="number" id="speedPlane" value="800" min="1"> km/h</label>
+        <button onclick="recompute()">Recalculate</button>
+      </div>
+      <div id="unreachableBox"></div>
+      <div class="total-bar" id="totalBar"></div>
+      <div class="legend">
+        <span class="mode-car">■ Car (solid)</span>
+        <span class="mode-horse">■ Horse (dashed)</span>
+        <span class="mode-plane">■ Plane (dotted)</span>
+      </div>
+      <table class="route" id="routeTable">
+        <tr><th>#</th><th>Mode</th><th>City</th><th>Word</th><th>Dist</th><th>Time</th></tr>
+      </table>
+      <div id="extracts"></div>
+    </div>
+    <div id="map"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    /*
+     * Landmass IDs.
+     * Gotland → merged into Eurasia (regular car ferry from mainland Sweden).
+     */
+    const L_EURASIA   = "Eurasia";
+    const L_NAMERICA  = "N. America";
+    const L_SAMERICA  = "S. America";
+    const L_AFRICA    = "Africa";
+    const L_AUSTRALIA = "Australia";
+    const L_NZ        = "New Zealand";
+    const L_MAYOTTE   = "Mayotte";
+    const L_MADAGASCAR= "Madagascar";
+    const L_SPM       = "St-Pierre";
+    const L_PHILIPPINES="Philippines";
+
+    const allCities = [
+      // ── Car (15) ──
+      { word:"BARODYNAMICS", city:"Casper",           country:"Wyoming",      lat:42.8666,  lon:-106.3131, mode:"car",   land:L_NAMERICA },
+      { word:"EBULLIOSCOPE", city:"Arzamas",          country:"Russia",       lat:55.3964,  lon:43.8400,   mode:"car",   land:L_EURASIA },
+      { word:"FURFURACEOUS", city:"Mubi",             country:"Nigeria",      lat:10.2681,  lon:13.2642,   mode:"car",   land:L_AFRICA },
+      { word:"HAPAXANTHOUS", city:"Baku",             country:"Azerbaijan",   lat:40.4093,  lon:49.8671,   mode:"car",   land:L_EURASIA },
+      { word:"HEKISTOTHERM", city:"Moora",            country:"Australia",    lat:-30.6378, lon:116.0078,  mode:"car",   land:L_AUSTRALIA },
+      { word:"INCLINOMETER", city:"Surat",            country:"India",        lat:21.1702,  lon:72.8311,   mode:"car",   land:L_EURASIA },
+      { word:"MARIMBAPHONE", city:"Marquette",        country:"Michigan",     lat:46.5436,  lon:-87.3954,  mode:"car",   land:L_NAMERICA },
+      { word:"NEBULOPHOBIA", city:"Beatty",           country:"Nevada",       lat:36.9086,  lon:-116.7592, mode:"car",   land:L_NAMERICA },
+      { word:"OCHROLEUCOUS", city:"Mosul",            country:"Iraq",         lat:36.3350,  lon:43.1189,   mode:"car",   land:L_EURASIA },
+      { word:"RECEPTACULAR", city:"Visby",            country:"Sweden",       lat:57.6348,  lon:18.2948,   mode:"car",   land:L_EURASIA },
+      { word:"RISORGIMENTO", city:"Istanbul",         country:"Turkey",       lat:41.0082,  lon:28.9784,   mode:"car",   land:L_EURASIA },
+      { word:"SALAMANDROID", city:"Genoa",            country:"Italy",        lat:44.4056,  lon:8.9463,    mode:"car",   land:L_EURASIA },
+      { word:"SCAPULOMANCY", city:"Mayotte",          country:"France",       lat:-12.8275, lon:45.1662,   mode:"car",   land:L_MAYOTTE },
+      { word:"THEANTHROPIC", city:"Giresun",          country:"Turkey",       lat:40.9128,  lon:38.3895,   mode:"car",   land:L_EURASIA },
+      { word:"ULTRAMONTANE", city:"L'Ascension",      country:"Quebec",       lat:46.9833,  lon:-73.8500,  mode:"car",   land:L_NAMERICA },
+      // ── Horse (9) ──
+      { word:"ABERUNCATORS", city:"Okato",            country:"New Zealand",  lat:-39.1983, lon:174.1067,  mode:"horse", land:L_NZ },
+      { word:"DEAMBULATORY", city:"Nova Russas",      country:"Brazil",       lat:-4.7044,  lon:-40.5642,  mode:"horse", land:L_SAMERICA },
+      { word:"FISSICOSTATE", city:"České Budějovice", country:"Czechia",      lat:48.9745,  lon:14.4744,   mode:"horse", land:L_EURASIA },
+      { word:"LACHRYMIFORM", city:"Christchurch",     country:"New Zealand",  lat:-43.5321, lon:172.6362,  mode:"horse", land:L_NZ },
+      { word:"LAEVODUCTION", city:"Castelo Branco",   country:"Portugal",     lat:39.8222,  lon:-7.4911,   mode:"horse", land:L_EURASIA },
+      { word:"OLERICULTURE", city:"Sokode",           country:"Togo",         lat:8.9833,   lon:1.1333,    mode:"horse", land:L_AFRICA },
+      { word:"SCAFFMASTERS", city:"Curicó",           country:"Chile",        lat:-34.9828, lon:-71.2394,  mode:"horse", land:L_SAMERICA },
+      { word:"UNDERBRIDGES", city:"Monkey Bay",       country:"Malawi",       lat:-14.0833, lon:35.2333,   mode:"horse", land:L_AFRICA },
+      { word:"WINDCHEATERS", city:"Antalya",          country:"Turkey",       lat:36.8969,  lon:30.7133,   mode:"horse", land:L_EURASIA },
+      // ── Plane (16) ──
+      { word:"ABOUTSLEDGES", city:"Ambanja",          country:"Madagascar",   lat:-13.6833, lon:48.4500,   mode:"plane", land:L_MADAGASCAR },
+      { word:"ABSQUATULATE", city:"Saint-Pierre",     country:"SPM",          lat:46.7878,  lon:-56.1777,  mode:"plane", land:L_SPM },
+      { word:"ECTYPOGRAPHY", city:"Krasnodar",        country:"Russia",       lat:45.0353,  lon:38.9753,   mode:"plane", land:L_EURASIA },
+      { word:"ELEEMOSYNARY", city:"Tucumán",          country:"Argentina",    lat:-26.8083, lon:-65.2176,  mode:"plane", land:L_SAMERICA },
+      { word:"EPANASTROPHE", city:"Derby",            country:"W. Australia", lat:-17.3050, lon:123.6278,  mode:"plane", land:L_AUSTRALIA },
+      { word:"EXSANGUINOUS", city:"Manaus",           country:"Brazil",       lat:-3.1190,  lon:-60.0217,  mode:"plane", land:L_SAMERICA },
+      { word:"LAMPADEPHORE", city:"Pune",             country:"India",        lat:18.5204,  lon:73.8567,   mode:"plane", land:L_EURASIA },
+      { word:"LIGNIPERDOUS", city:"Hasik",            country:"Oman",         lat:17.4167,  lon:55.6833,   mode:"plane", land:L_EURASIA },
+      { word:"MACHAIRODONT", city:"Velingrad",        country:"Bulgaria",     lat:42.0275,  lon:24.0000,   mode:"plane", land:L_EURASIA },
+      { word:"NARRISCHKEIT", city:"Marrakesh",        country:"Morocco",      lat:31.6295,  lon:-7.9811,   mode:"plane", land:L_AFRICA },
+      { word:"ODORIVECTORS", city:"Orlando",          country:"Florida",      lat:28.5383,  lon:-81.3792,  mode:"plane", land:L_NAMERICA },
+      { word:"SAPONIFIABLE", city:"Charlotte",        country:"N. Carolina",  lat:35.2271,  lon:-80.8431,  mode:"plane", land:L_NAMERICA },
+      { word:"SERPENTICIDE", city:"Edmonton",         country:"Canada",       lat:53.5461,  lon:-113.4938, mode:"plane", land:L_NAMERICA },
+      { word:"SNALLYGASTER", city:"Vladivostok",      country:"Russia",       lat:43.1155,  lon:131.8855,  mode:"plane", land:L_EURASIA },
+      { word:"TERAMORPHOUS", city:"Cochabamba",       country:"Bolivia",      lat:-17.3895, lon:-66.1568,  mode:"plane", land:L_SAMERICA },
+      { word:"WINTERBOURNE", city:"Tacurong",         country:"Philippines",  lat:6.6928,   lon:124.6764,  mode:"plane", land:L_PHILIPPINES }
+    ];
+
+    const modeColors = { car: "#3cb44b", horse: "#ffe119", plane: "#e6194b" };
+    const modeDash   = { car: null, horse: "10,6", plane: "3,6" };
+    const modeLabel  = { car: "CAR", horse: "HORSE", plane: "PLANE" };
+
+    function haversine(a, b) {
+      const R = 6371;
+      const dLat = (b.lat - a.lat) * Math.PI / 180;
+      const dLon = (b.lon - a.lon) * Math.PI / 180;
+      const x = Math.sin(dLat/2)**2 + Math.cos(a.lat*Math.PI/180) * Math.cos(b.lat*Math.PI/180) * Math.sin(dLon/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+    }
+
+    function getSpeed(mode) {
+      return {
+        car:   parseFloat(document.getElementById('speedCar').value)   || 80,
+        horse: parseFloat(document.getElementById('speedHorse').value) || 30,
+        plane: parseFloat(document.getElementById('speedPlane').value) || 800
+      }[mode];
+    }
+
+    /**
+     * Can we travel from `from` to `to`?
+     * Plane destinations: always reachable.
+     * Car/horse destinations: only if from.land === to.land.
+     */
+    function canReach(from, to) {
+      if (to.mode === 'plane') return true;
+      return from.land === to.land;
+    }
+
+    function travelCost(from, to) {
+      if (!canReach(from, to)) return Infinity;
+      return haversine(from, to) / getSpeed(to.mode);
+    }
+
+    /**
+     * Check which car/horse cities are on landmasses that have at least one
+     * plane destination (entry point) or another reachable city already in the route.
+     * Unreachable = car/horse on a landmass with ZERO plane destinations.
+     */
+    function findUnreachable(cities) {
+      const planeLands = new Set();
+      cities.forEach(c => { if (c.mode === 'plane') planeLands.add(c.land); });
+      return cities.filter(c => c.mode !== 'plane' && !planeLands.has(c.land));
+    }
+
+    function nearestNeighborTSP(cities) {
+      const n = cities.length;
+      let bestRoute = null, bestCost = Infinity;
+
+      for (let start = 0; start < n; start++) {
+        const remaining = new Set(Array.from({length: n}, (_, i) => i));
+        const path = [start]; remaining.delete(start);
+        let total = 0, stuck = false;
+
+        while (remaining.size > 0) {
+          const cur = path[path.length - 1];
+          let nearest = -1, nearCost = Infinity;
+          for (const idx of remaining) {
+            const c = travelCost(cities[cur], cities[idx]);
+            if (c < nearCost) { nearCost = c; nearest = idx; }
+          }
+          if (nearest === -1 || nearCost === Infinity) { stuck = true; break; }
+          path.push(nearest); remaining.delete(nearest); total += nearCost;
+        }
+        if (!stuck && total < bestCost) { bestCost = total; bestRoute = path; }
+      }
+      return bestRoute;
+    }
+
+    function totalRouteCost(route, cities) {
+      let t = 0;
+      for (let k = 0; k < route.length - 1; k++) {
+        const c = travelCost(cities[route[k]], cities[route[k+1]]);
+        if (c === Infinity) return Infinity;
+        t += c;
+      }
+      return t;
+    }
+
+    function twoOpt(route, cities) {
+      let r = route.slice(), improved = true, iter = 0;
+      let best = totalRouteCost(r, cities);
+      while (improved && iter < 500) {
+        improved = false; iter++;
+        for (let i = 0; i < r.length - 1; i++) {
+          for (let j = i + 2; j < r.length; j++) {
+            const candidate = [...r.slice(0, i+1), ...r.slice(i+1, j+1).reverse(), ...r.slice(j+1)];
+            const cost = totalRouteCost(candidate, cities);
+            if (cost < best - 0.001) {
+              r = candidate; best = cost; improved = true;
+            }
+          }
+        }
+      }
+      return r;
+    }
+
+    const mapObj = L.map('map', { worldCopyJump: true }).setView([20, 20], 2);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 18
+    }).addTo(mapObj);
+
+    let routeLayers = L.layerGroup().addTo(mapObj);
+
+    function formatHours(h) {
+      if (h < 1) return Math.round(h * 60) + 'm';
+      const days = Math.floor(h / 24);
+      const hrs = Math.round(h % 24);
+      if (days > 0) return days + 'd ' + hrs + 'h';
+      return Math.round(h) + 'h';
+    }
+
+    function recompute() {
+      document.getElementById('totalBar').innerHTML = '<b>Computing...</b>';
+
+      setTimeout(() => {
+        const unreachable = findUnreachable(allCities);
+        const reachable = allCities.filter(c => !unreachable.includes(c));
+
+        // Show unreachable
+        const uBox = document.getElementById('unreachableBox');
+        if (unreachable.length > 0) {
+          uBox.innerHTML = '<div class="unreachable-box"><b>⚠ Unreachable by rules (' + unreachable.length + '):</b><br>' +
+            unreachable.map(c =>
+              '<span class="mode-' + c.mode + '">' + modeLabel[c.mode] + '</span> ' +
+              '<span class="city">' + c.city + ', ' + c.country + '</span> — ' +
+              c.word + ' <span style="color:#666">(no plane destination on ' + c.land + ')</span>'
+            ).join('<br>') + '</div>';
+        } else {
+          uBox.innerHTML = '';
+        }
+
+        // Solve TSP on reachable cities
+        const nnRoute = nearestNeighborTSP(reachable);
+        if (!nnRoute) {
+          document.getElementById('totalBar').innerHTML = '<b style="color:#e89a9a">No valid route found!</b>';
+          return;
+        }
+        const optimized = twoOpt(nnRoute, reachable);
+
+        routeLayers.clearLayers();
+        const tbody = document.getElementById('routeTable');
+        tbody.innerHTML = '<tr><th>#</th><th>Mode</th><th>City</th><th>Word</th><th>Dist</th><th>Time</th></tr>';
+
+        let totalTime = 0, totalDist = 0;
+        const ordered = optimized.map(i => reachable[i]);
+
+        ordered.forEach((loc, i) => {
+          let dist = 0, time = 0;
+          if (i > 0) {
+            dist = haversine(ordered[i-1], loc);
+            time = dist / getSpeed(loc.mode);
+          }
+          totalDist += dist;
+          totalTime += time;
+
+          const tr = document.createElement('tr');
+          tr.innerHTML =
+            '<td class="route-num" style="color:'+modeColors[loc.mode]+'">'+(i+1)+'</td>' +
+            '<td class="route-mode mode-'+loc.mode+'">'+modeLabel[loc.mode]+'</td>' +
+            '<td class="route-city" onclick="zoomTo('+loc.lat+','+loc.lon+')">' +
+              loc.city + ', ' + loc.country +
+              ' <span style="color:#555;font-size:9px">['+loc.land+']</span>' +
+            '</td>' +
+            '<td class="route-word">'+loc.word+'</td>' +
+            '<td class="route-dist">'+(i===0?'—':Math.round(dist).toLocaleString()+' km')+'</td>' +
+            '<td class="route-time">'+(i===0?'START':formatHours(time))+'</td>';
+          tbody.appendChild(tr);
+
+          const numIcon = L.divIcon({
+            className: '',
+            html: '<div style="background:'+modeColors[loc.mode]+';color:'+(loc.mode==='horse'?'#000':'#fff')+';font-weight:bold;font-size:9px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.5)">'+(i+1)+'</div>',
+            iconSize: [20,20], iconAnchor: [10,10]
+          });
+          const marker = L.marker([loc.lat, loc.lon], { icon: numIcon });
+          marker.bindPopup(
+            '<b style="color:'+modeColors[loc.mode]+'">Stop '+(i+1)+' — '+modeLabel[loc.mode]+'</b><br>' +
+            '<b>'+loc.city+', '+loc.country+'</b><br>' +
+            '<span style="color:#888">'+loc.word+'</span><br>' +
+            '<span style="color:#666">'+loc.land+'</span>' +
+            (i > 0 ? '<br>'+Math.round(dist)+' km · '+formatHours(time) : '')
+          );
+          routeLayers.addLayer(marker);
+
+          if (i > 0) {
+            const line = L.polyline(
+              [[ordered[i-1].lat, ordered[i-1].lon], [loc.lat, loc.lon]],
+              { color: modeColors[loc.mode], weight: 2.5, opacity: 0.7, dashArray: modeDash[loc.mode] }
+            );
+            routeLayers.addLayer(line);
+          }
+        });
+
+        // Unreachable markers (grey, with X)
+        unreachable.forEach(loc => {
+          const icon = L.divIcon({
+            className: '',
+            html: '<div style="background:#555;color:#fff;font-weight:bold;font-size:11px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #e89a9a;box-shadow:0 1px 4px rgba(0,0,0,0.5)">✕</div>',
+            iconSize: [20,20], iconAnchor: [10,10]
+          });
+          const marker = L.marker([loc.lat, loc.lon], { icon: icon });
+          marker.bindPopup(
+            '<b style="color:#e89a9a">UNREACHABLE</b><br>' +
+            '<b>'+loc.city+', '+loc.country+'</b><br>' +
+            '<span style="color:#888">'+loc.word+' ('+modeLabel[loc.mode]+')</span><br>' +
+            '<span style="color:#666">No plane destination on '+loc.land+'</span>'
+          );
+          routeLayers.addLayer(marker);
+        });
+
+        // Stats
+        const carLegs = ordered.filter(l => l.mode === 'car').length;
+        const horseLegs = ordered.filter(l => l.mode === 'horse').length;
+        const planeLegs = ordered.filter(l => l.mode === 'plane').length;
+        document.getElementById('totalBar').innerHTML =
+          '<b>Total: ' + formatHours(totalTime) + '</b> · ' + Math.round(totalDist).toLocaleString() + ' km · ' + ordered.length + ' stops<br>' +
+          '<span style="color:#888;font-size:11px">' +
+          '<span class="mode-car">Car: ' + carLegs + '</span> · ' +
+          '<span class="mode-horse">Horse: ' + horseLegs + '</span> · ' +
+          '<span class="mode-plane">Plane: ' + planeLegs + '</span>' +
+          (unreachable.length ? ' · <span style="color:#e89a9a">' + unreachable.length + ' unreachable</span>' : '') +
+          '</span>';
+
+        // Extractions
+        const ext = document.getElementById('extracts');
+        const words = ordered.map(l => l.word);
+        ext.innerHTML =
+          '<div class="extract-label">Words in route order (' + ordered.length + '):</div>' +
+          '<div class="extract-box"><pre>' + words.map((w, i) =>
+            (i+1).toString().padStart(2) + '. ' + w + ' [' + ordered[i].mode.toUpperCase() + '] ' + ordered[i].land
+          ).join('\n') + '</pre></div>' +
+          '<div class="extract-label">First letters:</div>' +
+          '<div class="extract-box"><pre>' + words.map(w => w[0]).join('') + '</pre></div>' +
+          '<div class="extract-label">Last letters:</div>' +
+          '<div class="extract-box"><pre>' + words.map(w => w[11]).join('') + '</pre></div>' +
+          '<div class="extract-label">Mode sequence:</div>' +
+          '<div class="extract-box"><pre>' + ordered.map(l => l.mode[0].toUpperCase()).join('') + '</pre></div>' +
+          (unreachable.length ? (
+            '<div class="extract-label">Unreachable words:</div>' +
+            '<div class="extract-box"><pre>' + unreachable.map(c => c.word + ' [' + c.mode.toUpperCase() + '] ' + c.land).join('\n') + '</pre></div>' +
+            '<div class="extract-label">Unreachable first letters:</div>' +
+            '<div class="extract-box"><pre>' + unreachable.map(c => c.word[0]).join('') + '</pre></div>'
+          ) : '');
+
+        const bounds = L.latLngBounds([...ordered, ...unreachable].map(l => [l.lat, l.lon]));
+        mapObj.fitBounds(bounds.pad(0.1));
+      }, 50);
+    }
+
+    window.zoomTo = function(lat, lon) { mapObj.setView([lat, lon], 6); };
+    recompute();
+  </script>
+</body>
+</html>

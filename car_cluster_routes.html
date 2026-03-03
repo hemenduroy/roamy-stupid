@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trips by Car — Shortest cluster routes</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #1a1a1a; color: #e0e0e0; }
+    .site-title { padding: 10px 16px; background: #1a1a1a; border-bottom: 1px solid #333; }
+    .site-title a { color: #f0c050; text-decoration: none; font-weight: bold; font-size: 1rem; }
+    .site-title a:hover { text-decoration: underline; }
+    .layout { display: flex; height: calc(100vh - 42px); }
+    .sidebar { width: 370px; min-width: 300px; background: #1a1a1a; border-right: 1px solid #333; overflow-y: auto; padding: 12px; flex-shrink: 0; }
+    .sidebar h2 { font-size: 1rem; color: #f0c050; margin-bottom: 10px; }
+    .cluster-block { margin-bottom: 16px; }
+    .cluster-block h3 { font-size: 13px; color: #f0c050; margin-bottom: 4px; cursor: pointer; }
+    .cluster-block h3:hover { text-decoration: underline; }
+    .tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 8px; margin-left: 6px; vertical-align: middle; }
+    .tag-drive { background: #2d5a27; color: #a0e89a; }
+    .tag-island { background: #5a2727; color: #e89a9a; }
+    table.loc { border-collapse: collapse; font-size: 12px; width: 100%; }
+    table.loc td { padding: 3px 6px; border-bottom: 1px solid #2a2a2a; }
+    .loc-num { color: #f0c050; font-weight: bold; width: 18px; text-align: center; }
+    .loc-city { color: #7dd3fc; cursor: pointer; }
+    .loc-city:hover { text-decoration: underline; }
+    .loc-word { color: #888; font-size: 11px; font-family: 'Courier New', monospace; }
+    .route-order { color: #aaa; font-size: 11px; margin-top: 4px; }
+    .route-dist { color: #666; font-size: 11px; }
+    #map { flex: 1; }
+  </style>
+</head>
+<body>
+  <p class="site-title"><a href="index.html">&larr; ROAMY STUPID</a></p>
+  <div class="layout">
+    <div class="sidebar">
+      <h2>Shortest route per cluster</h2>
+      <div id="sidebar"></div>
+    </div>
+    <div id="map"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const locations = [
+      { n:1,  word:"BARODYNAMICS", phrase:"Join us at",   city:"Casper",      country:"Wyoming",       lat:42.8666,  lon:-106.3131, cluster:"North America" },
+      { n:2,  word:"EBULLIOSCOPE", phrase:"See lovely",   city:"Arzamas",     country:"Russia",        lat:55.3964,  lon:43.8400,   cluster:"Eurasia" },
+      { n:3,  word:"FURFURACEOUS", phrase:"Meet us at",   city:"Mubi",        country:"Nigeria",       lat:10.2681,  lon:13.2642,   cluster:"Africa" },
+      { n:4,  word:"HAPAXANTHOUS", phrase:"You'll like",  city:"Baku",        country:"Azerbaijan",    lat:40.4093,  lon:49.8671,   cluster:"Eurasia" },
+      { n:5,  word:"HEKISTOTHERM", phrase:"Get down to",  city:"Moora",       country:"Australia",     lat:-30.6378, lon:116.0078,  cluster:"Moora" },
+      { n:6,  word:"INCLINOMETER", phrase:"Come to",      city:"Surat",       country:"India",         lat:21.1702,  lon:72.8311,   cluster:"Eurasia" },
+      { n:7,  word:"MARIMBAPHONE", phrase:"Head off to",  city:"Marquette",   country:"Michigan",      lat:46.5436,  lon:-87.3954,  cluster:"North America" },
+      { n:8,  word:"NEBULOPHOBIA", phrase:"Return to",    city:"Beatty",      country:"Nevada",        lat:36.9086,  lon:-116.7592, cluster:"North America" },
+      { n:9,  word:"OCHROLEUCOUS", phrase:"Drop in on",   city:"Mosul",       country:"Iraq",          lat:36.3350,  lon:43.1189,   cluster:"Eurasia" },
+      { n:10, word:"RECEPTACULAR", phrase:"Stay at",      city:"Visby",       country:"Sweden",        lat:57.6348,  lon:18.2948,   cluster:"Visby" },
+      { n:11, word:"RISORGIMENTO", phrase:"Take in",      city:"Istanbul",    country:"Turkey",        lat:41.0082,  lon:28.9784,   cluster:"Eurasia" },
+      { n:12, word:"SALAMANDROID", phrase:"Stop off at",  city:"Genoa",       country:"Italy",         lat:44.4056,  lon:8.9463,    cluster:"Eurasia" },
+      { n:13, word:"SCAPULOMANCY", phrase:"Relax at",     city:"Mayotte",     country:"France",        lat:-12.8275, lon:45.1662,   cluster:"Mayotte" },
+      { n:14, word:"THEANTHROPIC", phrase:"Encounter",    city:"Giresun",     country:"Turkey",        lat:40.9128,  lon:38.3895,   cluster:"Eurasia" },
+      { n:15, word:"ULTRAMONTANE", phrase:"Hop over to",  city:"L'Ascension", country:"Quebec",        lat:46.9833,  lon:-73.8500,  cluster:"North America" }
+    ];
+
+    const clusterOrder = ["Eurasia", "North America", "Africa", "Moora", "Visby", "Mayotte"];
+    const clusterColors = {
+      "Eurasia":        "#e6194b",
+      "North America":  "#3cb44b",
+      "Africa":         "#ffe119",
+      "Moora":          "#4363d8",
+      "Visby":          "#f58231",
+      "Mayotte":        "#911eb4"
+    };
+    const clusterIsland = { "Moora": true, "Visby": true, "Mayotte": true };
+
+    // Haversine distance in km
+    function haversine(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    // Nearest-neighbor TSP approximation (greedy)
+    function nearestNeighborTSP(locs) {
+      if (locs.length <= 1) return locs.slice();
+      let best = null, bestDist = Infinity;
+      for (let start = 0; start < locs.length; start++) {
+        const remaining = new Set(locs.map((_, i) => i));
+        const path = [start];
+        remaining.delete(start);
+        let totalDist = 0;
+        while (remaining.size > 0) {
+          const cur = path[path.length - 1];
+          let nearest = -1, nearDist = Infinity;
+          for (const idx of remaining) {
+            const d = haversine(locs[cur].lat, locs[cur].lon, locs[idx].lat, locs[idx].lon);
+            if (d < nearDist) { nearDist = d; nearest = idx; }
+          }
+          path.push(nearest);
+          remaining.delete(nearest);
+          totalDist += nearDist;
+        }
+        if (totalDist < bestDist) { bestDist = totalDist; best = path; }
+      }
+      return best.map(i => locs[i]);
+    }
+
+    // Also try 2-opt improvement
+    function twoOpt(ordered) {
+      if (ordered.length <= 3) return ordered;
+      let route = ordered.slice();
+      let improved = true;
+      while (improved) {
+        improved = false;
+        for (let i = 0; i < route.length - 1; i++) {
+          for (let j = i + 2; j < route.length; j++) {
+            const d1 = haversine(route[i].lat, route[i].lon, route[i+1].lat, route[i+1].lon);
+            const d2 = (j + 1 < route.length)
+              ? haversine(route[j].lat, route[j].lon, route[j+1].lat, route[j+1].lon)
+              : 0;
+            const d3 = haversine(route[i].lat, route[i].lon, route[j].lat, route[j].lon);
+            const d4 = (j + 1 < route.length)
+              ? haversine(route[i+1].lat, route[i+1].lon, route[j+1].lat, route[j+1].lon)
+              : 0;
+            if (d3 + d4 < d1 + d2) {
+              const reversed = route.slice(i + 1, j + 1).reverse();
+              route = [...route.slice(0, i + 1), ...reversed, ...route.slice(j + 1)];
+              improved = true;
+            }
+          }
+        }
+      }
+      return route;
+    }
+
+    // Build clusters
+    const groups = {};
+    clusterOrder.forEach(c => groups[c] = []);
+    locations.forEach(loc => groups[loc.cluster].push(loc));
+
+    // Solve TSP per cluster
+    const routes = {};
+    clusterOrder.forEach(c => {
+      const locs = groups[c];
+      if (locs.length <= 2) { routes[c] = locs; return; }
+      const nn = nearestNeighborTSP(locs);
+      routes[c] = twoOpt(nn);
+    });
+
+    // Map setup
+    const map = L.map('map', { worldCopyJump: true }).setView([25, 10], 2);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 18
+    }).addTo(map);
+
+    const allMarkers = [];
+    const sidebarEl = document.getElementById('sidebar');
+
+    clusterOrder.forEach(cluster => {
+      const route = routes[cluster];
+      if (!route.length) return;
+      const color = clusterColors[cluster];
+      const isIsland = !!clusterIsland[cluster];
+
+      // Draw route on map
+      if (route.length > 1) {
+        const coords = route.map(loc => [loc.lat, loc.lon]);
+        L.polyline(coords, { color, weight: 3, opacity: 0.8, dashArray: isIsland ? null : '1' }).addTo(map);
+
+        // Arrow markers at midpoints
+        for (let i = 0; i < coords.length - 1; i++) {
+          const midLat = (coords[i][0] + coords[i+1][0]) / 2;
+          const midLon = (coords[i][1] + coords[i+1][1]) / 2;
+          const arrowIcon = L.divIcon({
+            className: '',
+            html: '<div style="color:' + color + ';font-size:10px;font-weight:bold">' + (i+1) + '→' + (i+2) + '</div>',
+            iconSize: [30, 14], iconAnchor: [15, 7]
+          });
+          L.marker([midLat, midLon], { icon: arrowIcon }).addTo(map);
+        }
+      }
+
+      // Place markers
+      const markers = [];
+      route.forEach((loc, i) => {
+        const numIcon = L.divIcon({
+          className: '',
+          html: '<div style="background:' + color + ';color:#fff;font-weight:bold;font-size:11px;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.5)">' + (i+1) + '</div>',
+          iconSize: [22, 22], iconAnchor: [11, 11]
+        });
+        const marker = L.marker([loc.lat, loc.lon], { icon: numIcon }).addTo(map);
+        marker.bindPopup(
+          '<b style="color:' + color + '">' + cluster + ' stop ' + (i+1) + '</b><br>' +
+          '<b>' + loc.city + ', ' + loc.country + '</b><br>' +
+          '<span style="color:#888">' + loc.word + '</span>'
+        );
+        markers.push(marker);
+        allMarkers.push(marker);
+      });
+
+      // Compute total distance
+      let totalKm = 0;
+      for (let i = 0; i < route.length - 1; i++) {
+        totalKm += haversine(route[i].lat, route[i].lon, route[i+1].lat, route[i+1].lon);
+      }
+
+      // Sidebar
+      const block = document.createElement('div');
+      block.className = 'cluster-block';
+
+      const tagClass = isIsland ? 'tag-island' : 'tag-drive';
+      const tagText = isIsland ? 'ISLAND' : 'DRIVABLE';
+
+      let shtml = '<h3 style="color:' + color + '" onclick="zoomCluster(' + JSON.stringify(route.map(l => [l.lat, l.lon])) + ')">';
+      shtml += cluster + ' (' + route.length + ')';
+      shtml += '<span class="tag ' + tagClass + '">' + tagText + '</span></h3>';
+
+      shtml += '<table class="loc">';
+      route.forEach((loc, i) => {
+        shtml += '<tr>';
+        shtml += '<td class="loc-num" style="color:' + color + '">' + (i+1) + '</td>';
+        shtml += '<td class="loc-city" onclick="zoomTo(' + loc.lat + ',' + loc.lon + ')">' + loc.city + ', ' + loc.country + '</td>';
+        shtml += '<td class="loc-word">' + loc.word + '</td>';
+        shtml += '</tr>';
+      });
+      shtml += '</table>';
+
+      const routeStr = route.map((l, i) => (i+1) + '. ' + l.city).join(' → ');
+      shtml += '<div class="route-order">Route: ' + routeStr + '</div>';
+      if (route.length > 1) {
+        shtml += '<div class="route-dist">Total: ~' + Math.round(totalKm).toLocaleString() + ' km (straight line)</div>';
+      }
+
+      // Word reading order
+      const wordOrder = route.map(l => l.word);
+      shtml += '<div class="route-order" style="margin-top:2px">Words in route order: ' + wordOrder.join(', ') + '</div>';
+      shtml += '<div class="route-order">First letters (route order): <b>' + wordOrder.map(w => w[0]).join('') + '</b></div>';
+
+      block.innerHTML = shtml;
+      sidebarEl.appendChild(block);
+    });
+
+    // Fit all
+    const allGroup = L.featureGroup(allMarkers);
+    map.fitBounds(allGroup.getBounds().pad(0.1));
+
+    // Zoom helpers
+    window.zoomTo = function(lat, lon) { map.setView([lat, lon], 6); };
+    window.zoomCluster = function(coords) {
+      if (coords.length === 1) { map.setView(coords[0], 6); return; }
+      map.fitBounds(L.latLngBounds(coords).pad(0.15));
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trips by Car — Drivable clusters</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Georgia', serif; background: #1a1a1a; color: #e0e0e0; padding: 1rem; margin: 0; }
+    .site-title { margin-bottom: 1rem; }
+    .site-title a { color: #f0c050; text-decoration: none; font-weight: bold; }
+    .site-title a:hover { text-decoration: underline; }
+    h1 { font-size: 1.2rem; color: #fff; margin-bottom: 0.5rem; }
+    .intro { font-size: 0.9rem; color: #888; margin-bottom: 1.5rem; }
+    section { margin-bottom: 2rem; }
+    section h2 { font-size: 1rem; color: #f0c050; margin-bottom: 0.5rem; border-bottom: 1px solid #444; padding-bottom: 4px; }
+    .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-left: 8px; font-family: system-ui, sans-serif; }
+    .tag-drive { background: #2d5a27; color: #a0e89a; }
+    .tag-island { background: #5a2727; color: #e89a9a; }
+    .grid-box { background: #252525; border: 1px solid #444; border-radius: 6px; padding: 10px 14px; display: inline-block; margin: 4px 0; }
+    .grid-box pre { margin: 0; font-family: 'Courier New', monospace; font-size: 13px; color: #f0c050; letter-spacing: 0.05em; }
+    table.info { border-collapse: collapse; font-size: 13px; margin-bottom: 10px; }
+    table.info th { text-align: left; color: #888; border-bottom: 1px solid #444; padding: 4px 10px; font-weight: normal; }
+    table.info td { padding: 4px 10px; border-bottom: 1px solid #2a2a2a; font-family: 'Courier New', monospace; }
+    .city { color: #7dd3fc; }
+    .phrase { color: #aaa; font-family: 'Georgia', serif; }
+    .extract { background: #333; border: 1px solid #555; border-radius: 4px; padding: 8px 12px; margin-top: 8px; font-family: 'Courier New', monospace; font-size: 14px; color: #f0c050; letter-spacing: 0.1em; }
+    .note { color: #888; font-size: 12px; font-style: italic; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <p class="site-title"><a href="index.html">&larr; ROAMY STUPID</a></p>
+  <h1>Trips by Car — Drivable clusters</h1>
+  <p class="intro">15 locations grouped by which can actually reach each other by car (road connectivity). Islands and unreachable places form solo groups.</p>
+  <div id="output"></div>
+
+  <script>
+    const data = [
+      { n:1,  word:"BARODYNAMICS", phrase:"Join us at",   city:"Casper, Wyoming",       cluster:"North America" },
+      { n:2,  word:"EBULLIOSCOPE", phrase:"See lovely",   city:"Arzamas, Russia",        cluster:"Eurasia" },
+      { n:3,  word:"FURFURACEOUS", phrase:"Meet us at",   city:"Mubi, Nigeria",          cluster:"Africa" },
+      { n:4,  word:"HAPAXANTHOUS", phrase:"You'll like",  city:"Baku, Azerbaijan",       cluster:"Eurasia" },
+      { n:5,  word:"HEKISTOTHERM", phrase:"Get down to",  city:"Moora, Australia",       cluster:"Moora (island continent)" },
+      { n:6,  word:"INCLINOMETER", phrase:"Come to",      city:"Surat, India",           cluster:"Eurasia" },
+      { n:7,  word:"MARIMBAPHONE", phrase:"Head off to",  city:"Marquette, Michigan",    cluster:"North America" },
+      { n:8,  word:"NEBULOPHOBIA", phrase:"Return to",    city:"Beatty, Nevada",         cluster:"North America" },
+      { n:9,  word:"OCHROLEUCOUS", phrase:"Drop in on",   city:"Mosul, Iraq",            cluster:"Eurasia" },
+      { n:10, word:"RECEPTACULAR", phrase:"Stay at",      city:"Visby, Sweden",          cluster:"Visby (Gotland island)" },
+      { n:11, word:"RISORGIMENTO", phrase:"Take in",      city:"Istanbul, Turkey",       cluster:"Eurasia" },
+      { n:12, word:"SALAMANDROID", phrase:"Stop off at",  city:"Genoa, Italy",           cluster:"Eurasia" },
+      { n:13, word:"SCAPULOMANCY", phrase:"Relax at",     city:"Mayotte, France",        cluster:"Mayotte (island)" },
+      { n:14, word:"THEANTHROPIC", phrase:"Encounter",    city:"Giresun, Turkey",        cluster:"Eurasia" },
+      { n:15, word:"ULTRAMONTANE", phrase:"Hop over to",  city:"L'Ascension, Quebec",    cluster:"North America" }
+    ];
+
+    const clusterOrder = [
+      "Eurasia",
+      "North America",
+      "Africa",
+      "Moora (island continent)",
+      "Visby (Gotland island)",
+      "Mayotte (island)"
+    ];
+
+    const clusterMeta = {
+      "Eurasia":                  { note: "All connected by road across the Eurasian landmass (Russia ↔ Azerbaijan ↔ Iraq ↔ Turkey ↔ Italy ↔ India)", island: false },
+      "North America":            { note: "All connected by US/Canadian highway system", island: false },
+      "Africa":                   { note: "Mubi is on the African mainland; technically drivable to Eurasia via Egypt/Sinai, but separated by Sahara", island: false },
+      "Moora (island continent)": { note: "Australia is an island continent — no road to any other location", island: true },
+      "Visby (Gotland island)":   { note: "Visby is on Gotland, an island in the Baltic Sea — requires a ferry from mainland Sweden", island: true },
+      "Mayotte (island)":         { note: "Mayotte is an island in the Mozambique Channel — no road connection at all", island: true }
+    };
+
+    const groups = {};
+    clusterOrder.forEach(c => groups[c] = []);
+    data.forEach(d => groups[d.cluster].push(d));
+
+    function pos(c) { return c.charCodeAt(0) - 65 + 1; }
+    function rot(c, n) { return String.fromCharCode(((c.charCodeAt(0) - 65 + n) % 26 + 26) % 26 + 65); }
+
+    const out = document.getElementById('output');
+
+    clusterOrder.forEach(cluster => {
+      const items = groups[cluster];
+      if (!items.length) return;
+      const meta = clusterMeta[cluster];
+      const solo = items.length === 1;
+      const tagClass = meta.island ? 'tag-island' : 'tag-drive';
+      const tagText = meta.island ? 'NOT DRIVABLE' : 'DRIVABLE';
+
+      let html = '<section>';
+      html += '<h2>' + cluster + ' (' + items.length + ')';
+      html += '<span class="tag ' + tagClass + '">' + tagText + '</span></h2>';
+      html += '<p class="note">' + meta.note + '</p>';
+
+      html += '<table class="info"><tr><th>#</th><th>Phrase</th><th>Word</th><th>City</th></tr>';
+      items.forEach(d => {
+        html += '<tr><td>' + d.n + '</td><td class="phrase">' + d.phrase + '</td><td>' + d.word + '</td><td class="city">' + d.city + '</td></tr>';
+      });
+      html += '</table>';
+
+      const words = items.map(d => d.word);
+      const letters = words.map(w => w.split(''));
+
+      html += '<div class="grid-box"><pre>' + words.join('\n') + '</pre></div><br>';
+
+      const firsts = letters.map(l => l[0]).join('');
+      html += '<div class="extract">First letters: ' + firsts + '</div>';
+
+      const lasts = letters.map(l => l[11]).join('');
+      html += '<div class="extract">Last letters: ' + lasts + '</div>';
+
+      const fl = letters.map(l => l[0] + l[11]).join(' ');
+      html += '<div class="extract">First+Last pairs: ' + fl + '</div>';
+
+      // City first letters
+      const cityFirsts = items.map(d => d.city.split(/[,\s]/)[0][0].toUpperCase()).join('');
+      html += '<div class="extract">City initials: ' + cityFirsts + '</div>';
+
+      // Nickname approach: first letter of city
+      const cityNames = items.map(d => d.city.split(',')[0].trim());
+      html += '<div class="extract">Cities: ' + cityNames.join(', ') + '</div>';
+
+      if (!solo) {
+        // Columns
+        let cols = '';
+        for (let c = 0; c < 12; c++) {
+          cols += 'Col ' + (c+1).toString().padStart(2) + ': ' + letters.map(l => l[c]).join('') + '\n';
+        }
+        html += '<div class="grid-box"><pre>' + cols.trim() + '</pre></div><br>';
+
+        // Diagonals
+        let diag = '', antidiag = '';
+        for (let i = 0; i < Math.min(items.length, 12); i++) {
+          diag += letters[i][i] || '';
+          antidiag += letters[i][11 - i] || '';
+        }
+        html += '<div class="extract">Diagonal ↘: ' + diag + '</div>';
+        html += '<div class="extract">Diagonal ↙: ' + antidiag + '</div>';
+      }
+
+      // Word sums
+      const sums = letters.map(l => l.reduce((a, c) => a + pos(c), 0));
+      html += '<div class="extract">Word sums: ' + sums.join(', ') + '</div>';
+      const total = sums.reduce((a, b) => a + b, 0);
+      html += '<div class="extract">Group total: ' + total + '  |  mod 26 → ' + String.fromCharCode(65 + (total % 26)) + '</div>';
+
+      // Sum mod 26 per word
+      const sumLetters = sums.map(s => String.fromCharCode(65 + (s % 26))).join('');
+      html += '<div class="extract">Row sums mod 26: ' + sumLetters + '</div>';
+
+      // Phrase word count → index
+      const pwcExtract = items.map(d => {
+        const wc = d.phrase.split(/\s+/).length;
+        return d.word[wc - 1] || '?';
+      }).join('');
+      html += '<div class="extract">Phrase word-count → index: ' + pwcExtract + '</div>';
+
+      // Middle letters
+      const mid6 = letters.map(l => l[5]).join('');
+      const mid7 = letters.map(l => l[6]).join('');
+      html += '<div class="extract">6th letters: ' + mid6 + '  |  7th letters: ' + mid7 + '</div>';
+
+      // Group size as index into each word
+      const gsExtract = letters.map(l => l[(items.length - 1) % 12] || '?').join('');
+      html += '<div class="extract">Group size (' + items.length + ') as position: ' + gsExtract + '</div>';
+
+      // ROT13
+      html += '<div class="grid-box"><pre>ROT13:\n' + words.map(w => w.split('').map(c => rot(c, 13)).join('')).join('\n') + '</pre></div><br>';
+
+      html += '</section>';
+      out.innerHTML += html;
+    });
+
+    // ─── ISLAND VS MAINLAND SUMMARY ───
+    const islands = data.filter(d => clusterMeta[d.cluster].island);
+    const mainland = data.filter(d => !clusterMeta[d.cluster].island);
+
+    let summary = '<section><h2>Island vs Mainland summary</h2>';
+    summary += '<table class="info"><tr><th></th><th>Words</th><th>First letters</th><th>Last letters</th><th>City initials</th><th>Count</th></tr>';
+
+    const islandWords = islands.map(d => d.word);
+    const mainlandWords = mainland.map(d => d.word);
+
+    summary += '<tr><td class="phrase">Mainland (drivable)</td>';
+    summary += '<td>' + mainlandWords.join(', ') + '</td>';
+    summary += '<td>' + mainland.map(d => d.word[0]).join('') + '</td>';
+    summary += '<td>' + mainland.map(d => d.word[11]).join('') + '</td>';
+    summary += '<td>' + mainland.map(d => d.city.split(/[,\s]/)[0][0].toUpperCase()).join('') + '</td>';
+    summary += '<td>' + mainland.length + '</td></tr>';
+
+    summary += '<tr><td class="phrase">Islands (NOT drivable)</td>';
+    summary += '<td>' + islandWords.join(', ') + '</td>';
+    summary += '<td>' + islands.map(d => d.word[0]).join('') + '</td>';
+    summary += '<td>' + islands.map(d => d.word[11]).join('') + '</td>';
+    summary += '<td>' + islands.map(d => d.city.split(/[,\s]/)[0][0].toUpperCase()).join('') + '</td>';
+    summary += '<td>' + islands.length + '</td></tr>';
+
+    summary += '</table>';
+
+    summary += '<div class="extract">Island first letters: ' + islands.map(d => d.word[0]).join('') + ' → HRS</div>';
+    summary += '<div class="extract">Island last letters: ' + islands.map(d => d.word[11]).join('') + '</div>';
+    summary += '<div class="extract">Island city initials: ' + islands.map(d => d.city.split(/[,\s]/)[0][0].toUpperCase()).join('') + ' → MVM</div>';
+    summary += '<div class="extract">Island word sums: ' + islands.map(d => d.word.split('').reduce((a, c) => a + pos(c), 0)).join(', ') + '</div>';
+    summary += '<div class="extract">Island original positions: ' + islands.map(d => d.n).join(', ') + ' → 5, 10, 13</div>';
+
+    // Mainland grid
+    summary += '<br><div class="grid-box"><pre>Mainland grid (12 words):\n' + mainlandWords.join('\n') + '</pre></div>';
+
+    // Island grid
+    summary += '<br><div class="grid-box"><pre>Island grid (3 words):\n' + islandWords.join('\n') + '</pre></div>';
+
+    // Mainland columns
+    const mLetters = mainlandWords.map(w => w.split(''));
+    let mCols = '';
+    for (let c = 0; c < 12; c++) {
+      mCols += 'Col ' + (c+1).toString().padStart(2) + ': ' + mLetters.map(l => l[c]).join('') + '\n';
+    }
+    summary += '<br><div class="grid-box"><pre>Mainland columns:\n' + mCols.trim() + '</pre></div>';
+
+    // Island columns
+    const iLetters = islandWords.map(w => w.split(''));
+    let iCols = '';
+    for (let c = 0; c < 12; c++) {
+      iCols += 'Col ' + (c+1).toString().padStart(2) + ': ' + iLetters.map(l => l[c]).join('') + '\n';
+    }
+    summary += '<br><div class="grid-box"><pre>Island columns:\n' + iCols.trim() + '</pre></div>';
+
+    summary += '</section>';
+    out.innerHTML += summary;
+  </script>
+</body>
+</html>

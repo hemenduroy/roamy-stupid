@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conf test — Great circle arcs</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, sans-serif; background: #1a1a1a; color: #eee; }
+    h1 { font-size: 1.1rem; margin: 0.5rem 1rem; }
+    .controls { padding: 0.5rem 1rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+    .controls label { font-size: 12px; }
+    #map { height: calc(100vh - 3rem); width: 100%; }
+    .legend { position: absolute; bottom: 24px; left: 12px; z-index: 1000; background: rgba(0,0,0,0.8); padding: 8px 12px; border-radius: 8px; font-size: 11px; max-height: 35%; overflow-y: auto; }
+    .legend div { margin: 2px 0; }
+    .legend span.dot { display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: middle; border-radius: 2px; }
+    .warn { color: #f80; font-size: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Conf test — Great circle arcs (left → middle → right)</h1>
+  <div class="controls">
+    <label>Data: <input type="file" id="fileInput" accept=".csv"> or use default (conf_test.csv)</label>
+    <button type="button" id="loadBtn">Load default</button>
+    <span id="status"></span>
+  </div>
+  <div id="map"></div>
+  <div id="legend" class="legend"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const COLORS = [
+      "#e6194b","#3cb44b","#ffe119","#4363d8","#f58231","#911eb4","#46f0f0","#f032e6",
+      "#bcf60c","#fabebe","#008080","#e6beff","#9a6324","#fffac8","#800000","#aaffc3",
+      "#808000","#ffd8b1","#000075","#808080","#e63946","#2a9d8f","#e9c46a","#1d3557","#457b9d"
+    ];
+
+    let coordsLookup = {};
+    const ALIASES = {
+      "dekalb, il": "dekalb, IL", "manistee, mi": "manistee, MI", "eyjafjallajokull, iceland": "eyjafjallajokull, Iceland",
+      "tijuana, mx": "tijuana, Mexico", "beatty, nv": "beatty, NV", "yellowknife, nt": "yellowknife, Canada",
+      "l'ascension, qc": "l'ascension, Quebec", "l’ascension, qc": "l'ascension, Quebec",
+      "montréal, qc": "montreal, Canada", "montreal, qc": "montreal, Canada",
+      "marquette, mi": "marquette, MI", "yellowstone": "yellowstone, WY", "casper, wy": "casper, WY",
+      "tampa bay, fl": "tampa bay, FL", "tashkent, uz": "tashkent, Uzbekistan", "arzamas, ru": "arzamas, Russia",
+      "tallinn, es": "tallinn, Estonia", "visby, se": "visby, Sweden", "copenhagen, dk": "copenhagen, Denmark",
+      "genoa, it": "genoa, Italy", "kandi, bj": "kandi, Benin", "mubi, ng": "mubi, Nigeria",
+      "dimtu, et": "dimtu, Ethiopia", "mosul, iq": "mosul, Iraq", "armavir, am": "armavir, Armenia",
+      "istanbul, tr": "istanbul, Turkey", "casablanca, ma": "casablanca, Morocco", "ankara, tr": "ankara, Turkey",
+      "giresun, tr": "giresun, Turkey", "tbilisi, ge": "tbilisi, Georgia", "baku, az": "baku, Azerbaijan",
+      "arles, fr": "arles, France", "surat, in": "surat, India", "thane, in": "thane, India",
+      "mayotte": "mayotte, France", "maputo, mz": "maputo, Mozambique", "moora, au": "moora, Australia",
+      "queensland, au": "cairns, Queensland, Australia", "iterup island, ru": "iturup, Russia", "iturup island, ru": "iturup, Russia",
+      "okato, nz": "okato, New Zealand", "lower hutt, nz": "lower hutt, New Zealand",
+      "christchurch, nz": "christchurch, New Zealand", "île de la possession": "ile de la possession, France",
+      "ile de la possession": "ile de la possession, France", "moscow, ru": "moscow, Russia",
+      "české budějovice, cz": "české budějovice, Czechia", "antalya, tr": "antalya, Turkey",
+      "doha, qa": "doha, Qatar", "sokodé, tg": "sokode, Togo", "sokode, tg": "sokode, Togo",
+      "divo, ci": "divo, Côte d'Ivoire", "monkey bay, mw": "monkey bay, Malawi",
+      "antananarivo, mg": "antananarivo, Madagascar", "nazaré coast, pt": "Nazaré Coast, Portugal", "nazare coast, pt": "nazaré, Portugal", "castelo branco, pt": "castelo branco, Portugal",
+      "accra, gh": "accra, Ghana", "nova russas, br": "nova russas, Brazil", "lima, pe": "lima, Peru",
+      "tierra del fuego": "tierra del fuego, Argentina", "curicó, cl": "curicó, Chile",
+      "north york, on": "north york, Ontario, Canada", "gaborone, bw": "gaborone, Botswana",
+      "velingrad, bg": "velingrad, Bulgaria", "salina turda, ro": "Salina Turda, Romania",
+      "krasnodar, ru": "krasnodar, Russia", "lahore, pk": "lahore, Pakistan", "pune, in": "pune, India",
+      "malé, mv": "malé, Maldives", "male, mv": "malé, Maldives", "nazif, om": "hasik, Oman",
+      "cairo, eg": "cairo, Egypt", "ambanja, mg": "ambanja, Madagascar",
+      "heard island": "heard island, Australia", "toad suck, ak": "toad suck, AR",
+      "edmonton, ab": "edmonton, Canada", "nome, ak": "nome, AK", "vladivostok, ru": "vladivostok, Russia",
+      "seoul, kr": "seoul, South Korea", "tacurong, ph": "tacurong, The Philippines",
+      "kupang, id": "kupang, Indonesia", "derby, au": "derby, Western Australia",
+      "south pole": "south pole, Antarctica", "tucuman, ar": "tucumán, Argentina",
+      "sucre, bo": "sucre, Bolivia", "cochabamba, bo": "cochabamba, Bolivia",
+      "new orleans, la": "new orleans, LA", "saint-pierre": "saint-pierre, Saint Pierre and Miquelon",
+      "buffalo, ny": "buffalo, NY", "charlotte, nc": "charlotte, NC", "orlando, fl": "orlando, FL",
+      "nazare, pt": "nazaré, Portugal", "marrakesh, ma": "marrakesh, Morocco",
+      "ascension island": "ascension island, United Kingdom", "manaus, br": "manaus, Brazil",
+      "quito, ec": "quito, Ecuador"
+    };
+
+    function normalizeName(s) {
+      if (!s || typeof s !== "string") return "";
+      let t = s.trim().toLowerCase().replace(/\s+/g, " ");
+      const key = t;
+      if (ALIASES[key]) return ALIASES[key];
+      return t.split(",").map(p => p.trim()).join(", ");
+    }
+
+    function buildCoordsLookup(puzzleData) {
+      const out = {};
+      function add(name, lat, lon) {
+        if (!name || typeof lat !== "number" || typeof lon !== "number") return;
+        const n = name.trim().toLowerCase();
+        out[n] = { lat, lon };
+        const withComma = name.trim();
+        out[withComma.toLowerCase()] = { lat, lon };
+      }
+      (puzzleData.stage1_locations || []).forEach(l => add(l.name, l.lat, l.lon));
+      (puzzleData.roamy_locations || []).forEach(l => add(l.name, l.lat, l.lon));
+      Object.keys(ALIASES).forEach(alias => {
+        const canon = ALIASES[alias];
+        if (out[canon.toLowerCase()]) out[alias] = out[canon.toLowerCase()];
+      });
+      return out;
+    }
+
+    function parseCSV(text) {
+      const lines = text.trim().split(/\r?\n/);
+      if (lines.length < 2) return [];
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        const parts = line.split(",").map(s => s.trim()).filter(Boolean);
+        let left, middle, right;
+        if (parts.length >= 6) {
+          left = parts[0] + ", " + parts[1];
+          middle = parts[2] + ", " + parts[3];
+          right = parts[4] + ", " + parts[5];
+        } else if (parts.length === 5) {
+          left = parts[0];
+          middle = parts[1] + ", " + parts[2];
+          right = parts[3] + ", " + parts[4];
+        } else if (parts.length === 4) {
+          left = parts[0] + ", " + parts[1];
+          middle = parts[2];
+          right = parts[3];
+        } else if (parts.length === 3) {
+          left = parts[0];
+          middle = parts[1];
+          right = parts[2];
+        } else continue;
+        rows.push({ left, middle, right });
+      }
+      return rows;
+    }
+
+    function latLonToVec(lat, lon) {
+      const phi = (90 - lat) * Math.PI / 180;
+      const th = lon * Math.PI / 180;
+      return [
+        Math.sin(phi) * Math.cos(th),
+        Math.cos(phi),
+        -Math.sin(phi) * Math.sin(th)
+      ];
+    }
+
+    function vecToLatLon(v) {
+      const x = v[0], y = v[1], z = v[2];
+      const lat = 90 - Math.acos(Math.max(-1, Math.min(1, y))) * (180 / Math.PI);
+      let lon = Math.atan2(-z, x) * (180 / Math.PI);
+      return [lat, lon];
+    }
+
+    function greatCircleArc(lat1, lon1, lat2, lon2, numPoints) {
+      const v1 = latLonToVec(lat1, lon1);
+      const v2 = latLonToVec(lat2, lon2);
+      const pts = [];
+      for (let i = 0; i <= numPoints; i++) {
+        const t = i / numPoints;
+        const dot = v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2];
+        const angle = Math.acos(Math.max(-1, Math.min(1, dot)));
+        if (angle < 1e-6) {
+          pts.push([lat1, lon1]);
+          continue;
+        }
+        const sinA = Math.sin(angle);
+        const w = (Math.sin((1 - t) * angle) / sinA) * v1[0] + (Math.sin(t * angle) / sinA) * v2[0];
+        const w1 = (Math.sin((1 - t) * angle) / sinA) * v1[1] + (Math.sin(t * angle) / sinA) * v2[1];
+        const w2 = (Math.sin((1 - t) * angle) / sinA) * v1[2] + (Math.sin(t * angle) / sinA) * v2[2];
+        pts.push(vecToLatLon([w, w1, w2]));
+      }
+      return pts;
+    }
+
+    function splitAtDateLine(pts) {
+      const segments = [];
+      let current = [];
+      for (let i = 0; i < pts.length; i++) {
+        const p = pts[i];
+        if (current.length > 0 && Math.abs(p[1] - current[current.length - 1][1]) > 180) {
+          if (current.length >= 2) segments.push(current);
+          current = [p];
+        } else {
+          current.push(p);
+        }
+      }
+      if (current.length >= 2) segments.push(current);
+      return segments.length ? segments : (pts.length >= 2 ? [pts] : []);
+    }
+
+    function resolveCoords(name) {
+      const n = normalizeName(name);
+      const byLower = n.toLowerCase();
+      if (coordsLookup[byLower]) return coordsLookup[byLower];
+      for (const key of Object.keys(coordsLookup)) {
+        if (key.includes(byLower) || byLower.includes(key)) return coordsLookup[key];
+      }
+      return null;
+    }
+
+    let map = null;
+    let layers = [];
+
+    function clearMap() {
+      layers.forEach(l => { if (map && l) map.removeLayer(l); });
+      layers = [];
+    }
+
+    function drawArcs(rows) {
+      clearMap();
+      const legendEl = document.getElementById("legend");
+      legendEl.innerHTML = "";
+      const missing = [];
+      rows.forEach((row, i) => {
+        const color = COLORS[i % COLORS.length];
+        const left = resolveCoords(row.left);
+        const middle = resolveCoords(row.middle);
+        const right = resolveCoords(row.right);
+        if (!left) missing.push(row.left);
+        if (!middle) missing.push(row.middle);
+        if (!right) missing.push(row.right);
+        if (!left || !middle || !right) return;
+        const arc1 = greatCircleArc(left.lat, left.lon, middle.lat, middle.lon, 64);
+        const arc2 = greatCircleArc(middle.lat, middle.lon, right.lat, right.lon, 64);
+        [arc1, arc2].forEach(arc => {
+          const segs = splitAtDateLine(arc);
+          segs.forEach(seg => {
+            const line = L.polyline(seg, { color, weight: 2, opacity: 0.9 });
+            line.addTo(map);
+            layers.push(line);
+          });
+        });
+        legendEl.innerHTML += `<div><span class="dot" style="background:${color}"></span> ${row.left} → ${row.middle} → ${row.right}</div>`;
+      });
+      if (missing.length) {
+        const uniq = [...new Set(missing)];
+        document.getElementById("status").innerHTML = `<span class="warn">Missing coords: ${uniq.join(", ")}</span>`;
+      } else {
+        document.getElementById("status").textContent = `${rows.length} rows drawn.`;
+      }
+    }
+
+    function run(csvText) {
+      const rows = parseCSV(csvText);
+      if (!rows.length) {
+        document.getElementById("status").textContent = "No rows parsed.";
+        return;
+      }
+      drawArcs(rows);
+    }
+
+    document.getElementById("loadBtn").addEventListener("click", async () => {
+      document.getElementById("status").textContent = "Loading…";
+      try {
+        const base = window.location.pathname.replace(/\/[^/]*$/, "/");
+        const r = await fetch(base + "data/conf_test.csv");
+        if (!r.ok) throw new Error("Failed to fetch conf_test.csv");
+        const text = await r.text();
+        run(text);
+      } catch (e) {
+        document.getElementById("status").textContent = "Error: " + e.message;
+      }
+    });
+
+    document.getElementById("fileInput").addEventListener("change", async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        run(text);
+      } catch (err) {
+        document.getElementById("status").textContent = "Error: " + err.message;
+      }
+      e.target.value = "";
+    });
+
+    (async function init() {
+      map = L.map("map", { zoomSnap: 0.25 }).setView([20, 0], 2);
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", { attribution: "© CARTO" }).addTo(map);
+
+      try {
+        const base = window.location.pathname.replace(/\/[^/]*$/, "/");
+        const [csvRes, puzzleRes] = await Promise.all([
+          fetch(base + "data/conf_test.csv"),
+          fetch(base + "data/puzzle_data.json")
+        ]);
+        if (puzzleRes.ok) {
+          const puzzleData = await puzzleRes.json();
+          coordsLookup = buildCoordsLookup(puzzleData);
+        }
+        if (csvRes.ok) {
+          const text = await csvRes.text();
+          run(text);
+        } else {
+          document.getElementById("status").textContent = "Drop conf_test.csv or click Load default (serve from same origin).";
+        }
+      } catch (e) {
+        document.getElementById("status").textContent = "Load data via file input or serve page from repo and click Load default.";
+      }
+    })();
+  </script>
+</body>
+</html>

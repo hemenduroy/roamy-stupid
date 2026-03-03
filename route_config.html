@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roamy Stupid — Route Config</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, sans-serif; background: #f5f5f5; color: #222; }
+    .layout { max-width: 1120px; margin: 0 auto; padding: 12px; }
+    .panel-left { width: 100%; padding: 0; background: transparent; }
+    .panel-left h2 { font-size: 1rem; margin: 0 0 12px 0; color: #333; }
+    .drawer-toggle { display: none; }
+    .panel-right { display: none; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 2px 0; }
+    .grid-row { display: grid; grid-template-columns: 20px 24px 24px minmax(150px,1fr) minmax(150px,1fr) minmax(150px,1fr) 32px 36px 56px; gap: 6px 8px; align-items: center; min-height: 28px; }
+    .grid .header { font-size: 11px; color: #666; }
+    .grid .header.header-num { text-align: right; font-variant-numeric: tabular-nums; }
+    .grid .row-num { font-size: 11px; color: #555; text-align: right; font-variant-numeric: tabular-nums; }
+    .grid .header .col-num { display: inline-block; width: 16px; height: 16px; line-height: 16px; text-align: center; border-radius: 50%; background: #ddd; color: #333; font-weight: 700; font-size: 10px; margin-right: 4px; }
+    .grid .row-swatch { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0; }
+    .grid .row-clear { width: 24px; height: 24px; padding: 0; border: 1px solid #bbb; border-radius: 4px; background: #e0e0e0; color: #666; font-size: 14px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .grid .row-clear:hover { background: #ccc; color: #c00; border-color: #999; }
+    .grid select { padding: 4px 5px; background: #fff; color: #222; border: 1px solid #bbb; border-radius: 4px; font-size: 11px; min-width: 0; }
+    .grid select.confirmed { background: #d4edda; border-color: #28a745; }
+    .grid select.probable { background: #fff3cd; border-color: #e67e22; }
+    .grid select.speculative { background: #d6eaf8; border-color: #5dade2; }
+    .grid select option { background: #fff; }
+    .grid .cell-wrap { display: flex; flex-direction: row; align-items: center; gap: 4px; }
+    .grid .cell-wrap select { flex: 1; min-width: 0; }
+    .grid .vehicle-tag { font-size: 9px; font-weight: 700; padding: 2px 4px; border-radius: 3px; flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.03em; line-height: 1; white-space: nowrap; }
+    #globeContainer { display: none; }
+    .globe-toolbar { position: absolute; top: 10px; left: 10px; z-index: 10; display: flex; align-items: center; gap: 8px; }
+    .globe-toolbar label { font-size: 12px; color: #e0e0e0; cursor: pointer; user-select: none; }
+    .globe-toolbar input[type="checkbox"] { cursor: pointer; }
+    .toolbar { margin-bottom: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .toolbar button { padding: 6px 12px; background: #e0e0e0; color: #222; border: 1px solid #bbb; border-radius: 6px; cursor: pointer; font-size: 12px; }
+    .toolbar button:hover { background: #ccc; color: #000; }
+    .toolbar .hint { font-size: 11px; color: #888; margin-top: 0; }
+    .site-title { padding: 10px 12px; border-bottom: 1px solid #ccc; background: #f5f5f5; }
+    .site-title a { color: #333; text-decoration: none; font-weight: bold; font-size: 1rem; }
+    .site-title a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <p class="site-title">
+    <a href="index.html">&larr; ROAMY STUPID</a>
+    &nbsp;|&nbsp;
+    <a href="route_globe.html">View globe</a>
+  </p>
+  <div class="layout">
+    <div class="panel-left" id="panelLeft">
+      <h2>41 × 3 triplets (stage1 | roamy | stage1)</h2>
+      <div class="toolbar">
+        <button id="downloadConfigBtn" type="button">Download config (JSON)</button>
+        <span class="hint">Edit the dropdowns below, then use “View globe” to see the routes.</span>
+      </div>
+      <div class="grid" id="tripletGrid"></div>
+    </div>
+  </div>
+
+  <script>
+    window.updateRoutes = function() {};
+    window.initGlobe = function() {};
+  </script>
+  <script>
+    (function() {
+      var DATA, ROWS, COLORS, grid, vehicleIcons, PHRASE, phraseAssignment;
+      var STAGE1_VEHICLE_COLOR = {}, ROAMY_VEHICLE_COLOR = {}, ROAMY_FIRST_LETTER = {};
+      var rowLetterCells = {}, rowModeCells = {};
+      var colorMap = { brown: "#8B4513", gold: "#DAA520", green: "#228B22", purple: "#7B2D8B", silver: "#999", black: "#222", blue: "#2266CC", red: "#CC2222", yellow: "#CCAA00" };
+      var ROUTE_CONFIG_KEY = "roamyRouteConfigRows";
+      function initFromPuzzleData(pd) {
+        var s1 = pd.stage1_locations || [], s2 = pd.roamy_locations || [];
+        DATA = { locs: s1.map(function(l){ return { name: l.name, lat: l.lat, lon: l.lon }; }), roamy: s2.map(function(l){ return { name: l.name, lat: l.lat, lon: l.lon }; }) };
+        window.ROUTE_DATA = DATA;
+        ROWS = 41;
+        COLORS = ["#e6194b","#3cb44b","#ffe119","#4363d8","#f58231","#911eb4","#46f0f0","#f032e6","#bcf60c","#fabebe","#008080","#e6beff","#9a6324","#fffac8","#800000","#aaffc3","#808000","#ffd8b1","#000075","#808080","#e63946","#2a9d8f","#e9c46a","#1d3557","#457b9d","#a8dadc","#f4a261","#e76f51","#2ec4b6","#ff9f1c","#011627","#fdfffc","#41ead4","#ff006e","#8338ec","#3a86ff","#fb5607","#06d6a0","#118ab2","#ef476f","#ffd166","#073b4c"];
+        s1.forEach(function(l){ if(l.vehicle_color) STAGE1_VEHICLE_COLOR[l.name]=l.vehicle_color; });
+        s2.forEach(function(l){ if(l.vehicle_color) ROAMY_VEHICLE_COLOR[l.name]=l.vehicle_color; if(l.letter) ROAMY_FIRST_LETTER[l.name]=l.letter; });
+        vehicleIcons = pd.row_vehicle_colors || {};
+        PHRASE = pd.phrase || "NUMBERSFORTHISHALFWOULDSMELLASSWEETASONE";
+        phraseAssignment = {};
+        for (var r=1; r<=40 && r<=PHRASE.length; r++) {
+          var w = PHRASE[r-1];
+          for (var i=0; i<DATA.roamy.length; i++) { if ((ROAMY_FIRST_LETTER[DATA.roamy[i].name]||"").toUpperCase()===w) { phraseAssignment[r]=i; break; } }
+        }
+      }
+      var gridEl = document.getElementById("tripletGrid");
+      var dataUrl = (function() {
+        var p = window.location.pathname;
+        return p.lastIndexOf("/") >= 0 ? p.slice(0, p.lastIndexOf("/") + 1) + "puzzle_data.json" : "puzzle_data.json";
+      })();
+      fetch(dataUrl).then(function(r){ return r.ok ? r.json() : null; }).then(function(puzzleData) {
+        try {
+        if (!puzzleData) { gridEl.innerHTML = "<p>Failed to load puzzle_data.json (check URL: " + dataUrl + ")</p>"; return; }
+        initFromPuzzleData(puzzleData);
+        grid = gridEl;
+        var headerRow = document.createElement("div");
+        headerRow.className = "grid-row";
+        function addHeaderCell(className, content) {
+          var d = document.createElement("div");
+          if (className) d.className = className;
+          d[typeof content==="string"&&content.indexOf("<")>=0?"innerHTML":"textContent"] = content || "";
+          headerRow.appendChild(d);
+        }
+        addHeaderCell("header",""); addHeaderCell("header header-num","#");
+        addHeaderCell("header",'<span title="Show arc on globe">Show</span>');
+        addHeaderCell("header",'<span class="col-num">1</span>Location (start)');
+        addHeaderCell("header",'<span class="col-num">2</span>Roamy (middle)');
+        addHeaderCell("header",'<span class="col-num">3</span>Location (end)');
+        addHeaderCell("header",""); addHeaderCell("header","Letter"); addHeaderCell("header","Mode");
+        grid.appendChild(headerRow);
+
+      function allowedRoamyIndicesForRow(row) {
+        // Row 0: example row, no phrase constraint.
+        if (row <= 0 || row > PHRASE.length) {
+          return DATA.roamy.map(function(_, i) { return i; });
+        }
+        var want = PHRASE[row - 1]; // rows 1–40
+        var wantVc = (vehicleIcons[row] || [null, null, null])[1]; // middle column vehicle-color for this row
+        var out = [];
+        DATA.roamy.forEach(function(l, i) {
+          if ((ROAMY_FIRST_LETTER[l.name] || "").toUpperCase() !== want) return;
+          if (wantVc) {
+            var roamyVc = ROAMY_VEHICLE_COLOR[l.name];
+            if (roamyVc !== wantVc) return; // e.g. row 33 purple-plane: exclude krasnodar (red-plane)
+          }
+          out.push(i);
+        });
+        return out;
+      }
+
+      function allowedLocIndicesFor(row, pos) {
+        var icon = (vehicleIcons[row] || [null,null,null])[pos];
+        if (!icon) {
+          return DATA.locs.map(function(_, i) { return i; });
+        }
+        var need = icon; // e.g. "brown-boat"
+        var out = [];
+        DATA.locs.forEach(function(l, i) {
+          if (STAGE1_VEHICLE_COLOR[l.name] === need) out.push(i);
+        });
+        // Fallback: if filtering removed everything, allow all.
+        return out.length ? out : DATA.locs.map(function(_, i) { return i; });
+      }
+
+      function makeCell(selectEl, iconCode) {
+        var wrap = document.createElement("div");
+        wrap.className = "cell-wrap";
+        if (iconCode) {
+          var parts = iconCode.split("-");
+          var color = parts[0];
+          var vehicle = parts[1];
+          var tag = document.createElement("span");
+          tag.className = "vehicle-tag";
+          tag.style.background = colorMap[color] || "#888";
+          tag.style.color = (color === "gold" || color === "yellow" || color === "silver") ? "#222" : "#fff";
+          tag.textContent = vehicle;
+          tag.title = color + " " + vehicle;
+          wrap.appendChild(tag);
+        }
+        wrap.appendChild(selectEl);
+        return wrap;
+      }
+      function roamyModeForIndex(idx) {
+        if (idx <= 0 || idx >= DATA.roamy.length) {
+          if (idx === 0) return "CAR"; // manistee example row 0
+          return "";
+        }
+        if (idx >= 0 && idx <= 14) return "CAR";
+        if (idx >= 15 && idx <= 23) return "HORSE";
+        return "PLANE";
+      }
+
+      function updateRowLetter(r) {
+        var letterCell = rowLetterCells[r];
+        var modeCell = rowModeCells[r];
+        if (!letterCell || !modeCell) return;
+        if (r === 0) {
+          letterCell.textContent = "";
+          letterCell.title = "";
+          modeCell.textContent = "";
+          modeCell.title = "";
+          return;
+        }
+        var s2 = document.getElementById("roamy_" + r);
+        if (!s2 || s2.value === "") {
+          letterCell.textContent = "";
+          letterCell.title = "";
+          modeCell.textContent = "";
+          modeCell.title = "";
+          return;
+        }
+        var idx = parseInt(s2.value, 10);
+        if (isNaN(idx) || !DATA.roamy[idx]) {
+          letterCell.textContent = "";
+          letterCell.title = "";
+          modeCell.textContent = "";
+          modeCell.title = "";
+          return;
+        }
+        var roamyName = DATA.roamy[idx].name;
+        var letter = ROAMY_FIRST_LETTER[roamyName] || "";
+        var mode = roamyModeForIndex(idx);
+        letterCell.textContent = letter;
+        letterCell.title = roamyName + " → " + (letter || "?");
+        modeCell.textContent = mode;
+        modeCell.title = roamyName + " (" + (mode ? mode.toLowerCase() : "") + ")";
+      }
+
+      function getUsedRoamyIndices(excludeRow) {
+        var used = new Set();
+        for (var r = 0; r < ROWS; r++) {
+          if (r === excludeRow) continue;
+          var s2 = document.getElementById("roamy_" + r);
+          if (!s2 || !s2.value) continue;
+          var idx = parseInt(s2.value, 10);
+          if (!isNaN(idx)) used.add(idx);
+        }
+        return used;
+      }
+
+      function rebuildRoamyOptions(row) {
+        var s2 = document.getElementById("roamy_" + row);
+        if (!s2) return;
+        var current = s2.value;
+        var used = getUsedRoamyIndices(row);
+        var allowed = allowedRoamyIndicesForRow(row);
+        var opts = ['<option value=""></option>'];
+        allowed.forEach(function(i) {
+          if (used.has(i) && String(i) !== current) return;
+          var l = DATA.roamy[i];
+          opts.push('<option value="'+i+'"'+(String(i)===current?' selected':'')+'>'+escapeHtml(l.name)+'</option>');
+        });
+        s2.innerHTML = opts.join("");
+      }
+
+      for (let r = 0; r < ROWS; r++) {
+        var rowDiv = document.createElement("div");
+        rowDiv.className = "grid-row";
+        const swatch = document.createElement("div");
+        swatch.className = "row-swatch";
+        swatch.style.backgroundColor = COLORS[r % COLORS.length];
+        swatch.title = "Row " + r + " — same color on globe";
+        rowDiv.appendChild(swatch);
+        const rowNum = document.createElement("div");
+        rowNum.className = "row-num";
+        rowNum.textContent = r;
+        rowDiv.appendChild(rowNum);
+        const showCb = document.createElement("input");
+        showCb.type = "checkbox";
+        showCb.id = "show_" + r;
+        showCb.checked = true;
+        showCb.title = "Show row " + r + " arc on globe";
+        showCb.style.cursor = "pointer";
+        rowDiv.appendChild(showCb);
+        var icons = vehicleIcons[r] || [null, null, null];
+        const s1 = document.createElement("select");
+        s1.id = "loc1_" + r;
+        s1.innerHTML = '<option value=""></option>' + allowedLocIndicesFor(r, 0).map(function(i) {
+          var l = DATA.locs[i];
+          return '<option value="'+i+'">'+escapeHtml(l.name)+'</option>';
+        }).join("");
+        rowDiv.appendChild(makeCell(s1, icons[0]));
+        const s2 = document.createElement("select");
+        s2.id = "roamy_" + r;
+        s2.innerHTML = '<option value=""></option>' + allowedRoamyIndicesForRow(r).map(function(i) {
+          var l = DATA.roamy[i];
+          return '<option value="'+i+'">'+escapeHtml(l.name)+'</option>';
+        }).join("");
+        if (phraseAssignment[r] !== undefined) s2.value = String(phraseAssignment[r]);
+        rowDiv.appendChild(makeCell(s2, icons[1]));
+        const s3 = document.createElement("select");
+        s3.id = "loc2_" + r;
+        s3.innerHTML = '<option value=""></option>' + allowedLocIndicesFor(r, 2).map(function(i) {
+          var l = DATA.locs[i];
+          return '<option value="'+i+'">'+escapeHtml(l.name)+'</option>';
+        }).join("");
+        rowDiv.appendChild(makeCell(s3, icons[2]));
+        const clearBtn = document.createElement("button");
+        clearBtn.className = "row-clear";
+        clearBtn.type = "button";
+        clearBtn.textContent = "×";
+        clearBtn.title = "Clear row " + r;
+        clearBtn.addEventListener("click", function() {
+          s1.value = ""; s2.value = ""; s3.value = "";
+          updateRowLetter(r);
+          saveConfigToStorage();
+          if (window.updateRoutes) window.updateRoutes();
+        });
+        rowDiv.appendChild(clearBtn);
+        var letterCell = document.createElement("div");
+        letterCell.style.textAlign = "center";
+        letterCell.style.fontFamily = "ui-monospace, monospace";
+        letterCell.style.fontWeight = "700";
+        letterCell.style.fontSize = "13px";
+        letterCell.textContent = "";
+        letterCell.title = "";
+        rowDiv.appendChild(letterCell);
+        rowLetterCells[r] = letterCell;
+        var modeCell = document.createElement("div");
+        modeCell.style.textAlign = "center";
+        modeCell.style.fontSize = "11px";
+        modeCell.style.fontWeight = "600";
+        modeCell.style.textTransform = "uppercase";
+        modeCell.style.letterSpacing = "0.03em";
+        modeCell.style.color = "#555";
+        modeCell.textContent = "";
+        modeCell.title = "";
+        rowDiv.appendChild(modeCell);
+        rowModeCells[r] = modeCell;
+        grid.appendChild(rowDiv);
+        showCb.addEventListener("change", () => { saveConfigToStorage(); window.updateRoutes && window.updateRoutes(); });
+        s1.addEventListener("change", () => { saveConfigToStorage(); window.updateRoutes && window.updateRoutes(); });
+        s3.addEventListener("change", () => { saveConfigToStorage(); window.updateRoutes && window.updateRoutes(); });
+        s2.addEventListener("change", () => { updateRowLetter(r); saveConfigToStorage(); window.updateRoutes && window.updateRoutes(); });
+        s2.addEventListener("focus", () => rebuildRoamyOptions(r));
+        s2.addEventListener("mousedown", () => rebuildRoamyOptions(r));
+        // Initialize letters after any pre-filled config load
+        updateRowLetter(r);
+      }
+      function escapeHtml(s) {
+        const d = document.createElement("div");
+        d.textContent = s;
+        return d.innerHTML;
+      }
+      function loadConfig(obj) {
+        var rows = obj.rows || [];
+        var nameToLocIndex = {};
+        DATA.locs.forEach(function(l, i) { nameToLocIndex[l.name] = i; });
+        var nameToRoamyIndex = {};
+        DATA.roamy.forEach(function(l, i) { nameToRoamyIndex[l.name] = i; });
+        for (var i = 0; i < 41; i++) {
+          var s1 = document.getElementById("loc1_" + i), s2 = document.getElementById("roamy_" + i), s3 = document.getElementById("loc2_" + i);
+          var showEl = document.getElementById("show_" + i);
+          if (s1) s1.value = ""; if (s2) s2.value = ""; if (s3) s3.value = "";
+          if (showEl) showEl.checked = true;
+        }
+        for (var i = 0; i < rows.length; i++) {
+          var row = rows[i];
+          var r = (typeof row.row === "number" && row.row >= 0 && row.row < 41) ? row.row : i;
+          var s1 = document.getElementById("loc1_" + r), s2 = document.getElementById("roamy_" + r), s3 = document.getElementById("loc2_" + r);
+          var showEl = document.getElementById("show_" + r);
+          if (!s1 || !s2 || !s3) continue;
+          if (row.loc1 !== undefined && row.loc1 !== "" && nameToLocIndex[row.loc1] !== undefined) s1.value = String(nameToLocIndex[row.loc1]);
+          if (row.roamy !== undefined && row.roamy !== "" && nameToRoamyIndex[row.roamy] !== undefined) s2.value = String(nameToRoamyIndex[row.roamy]);
+          if (row.loc2 !== undefined && row.loc2 !== "" && nameToLocIndex[row.loc2] !== undefined) s3.value = String(nameToLocIndex[row.loc2]);
+          if (showEl && row.visible !== undefined) showEl.checked = !!row.visible;
+        }
+        for (var i = 0; i < 41; i++) updateRowLetter(i);
+        if (window.updateRoutes) window.updateRoutes();
+      }
+
+      function clearHighlightClasses() {
+        for (var r = 0; r < ROWS; r++) {
+          ['loc1', 'roamy', 'loc2'].forEach(function(pos) {
+            var sel = document.getElementById(pos + '_' + r);
+            if (sel) sel.classList.remove('confirmed', 'probable', 'speculative');
+          });
+        }
+      }
+
+      function applyHighlightsFromConfig(obj) {
+        clearHighlightClasses();
+        if (!obj || !obj.rows) return;
+        var rows = obj.rows;
+        rows.forEach(function(row) {
+          if (typeof row.row !== "number") return;
+          var r = row.row;
+          ['loc1', 'roamy', 'loc2'].forEach(function(pos) {
+            var status = row[pos + '_status'];
+            if (!status) return;
+            var sel = document.getElementById(pos + '_' + r);
+            if (sel && sel.value !== '') sel.classList.add(status);
+          });
+        });
+      }
+
+        var rowsToLoad = puzzleData.rows;
+        try {
+          var saved = localStorage.getItem(ROUTE_CONFIG_KEY);
+          if (saved) {
+            var parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length) rowsToLoad = parsed;
+          }
+        } catch (e) {}
+        loadConfig({ rows: rowsToLoad });
+        applyHighlightsFromConfig({ rows: rowsToLoad });
+        } catch (err) {
+          gridEl.innerHTML = "<p style='color:#c00'>Error loading config: " + (err.message || String(err)) + "</p>";
+          if (console && console.error) console.error(err);
+        }
+
+      function buildConfigObject() {
+        function statusFor(pos, r) {
+          var sel = document.getElementById(pos + '_' + r);
+          if (!sel) return "";
+          if (sel.classList.contains('confirmed')) return 'confirmed';
+          if (sel.classList.contains('probable')) return 'probable';
+          if (sel.classList.contains('speculative')) return 'speculative';
+          return "";
+        }
+        var rows = [];
+        for (var r = 0; r < ROWS; r++) {
+          var s1 = document.getElementById("loc1_" + r);
+          var s2 = document.getElementById("roamy_" + r);
+          var s3 = document.getElementById("loc2_" + r);
+          var loc1 = "", roamy = "", loc2 = "";
+          if (s1 && s1.value !== "") {
+            var i1 = parseInt(s1.value, 10);
+            if (!isNaN(i1) && DATA.locs[i1]) loc1 = DATA.locs[i1].name;
+          }
+          if (s2 && s2.value !== "") {
+            var i2 = parseInt(s2.value, 10);
+            if (!isNaN(i2) && DATA.roamy[i2]) roamy = DATA.roamy[i2].name;
+          }
+          if (s3 && s3.value !== "") {
+            var i3 = parseInt(s3.value, 10);
+            if (!isNaN(i3) && DATA.locs[i3]) loc2 = DATA.locs[i3].name;
+          }
+          var showEl = document.getElementById("show_" + r);
+          rows.push({
+            row: r,
+            loc1: loc1,
+            roamy: roamy,
+            loc2: loc2,
+            visible: showEl ? showEl.checked : true,
+            loc1_status: statusFor('loc1', r),
+            roamy_status: statusFor('roamy', r),
+            loc2_status: statusFor('loc2', r)
+          });
+        }
+        return { rows: rows };
+      }
+      function saveConfigToStorage() {
+        try {
+          var rows = buildConfigObject().rows;
+          localStorage.setItem(ROUTE_CONFIG_KEY, JSON.stringify(rows));
+        } catch (e) {}
+      }
+
+      var downloadBtn = document.getElementById("downloadConfigBtn");
+      if (downloadBtn) {
+        downloadBtn.addEventListener("click", function() {
+          var updated = { stage1_locations: puzzleData.stage1_locations, roamy_locations: puzzleData.roamy_locations, row_vehicle_colors: puzzleData.row_vehicle_colors, phrase: puzzleData.phrase, rows: buildConfigObject().rows };
+          var blob = new Blob([JSON.stringify(updated, null, 2)], { type: "application/json" });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = url;
+          a.download = "puzzle_data.json";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+        });
+      }
+      }).catch(function(e) {
+        gridEl.innerHTML = "<p style='color:#c00'>Failed to load puzzle_data.json. Check the URL and that the file exists.</p>";
+        if (console && console.error) console.error(e);
+      });
+
+    })();
+  </script>
+</body>
+</html>
+

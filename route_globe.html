@@ -8,13 +8,13 @@
     * { box-sizing: border-box; }
     body { margin: 0; font-family: system-ui, sans-serif; background: #f5f5f5; color: #222; }
     .layout { position: relative; height: calc(100vh - 42px); }
-    .panel-left { position: absolute; top: 0; left: 0; bottom: 0; width: auto; max-width: 90vw; padding: 12px; overflow-y: auto; background: rgba(245,245,245,0.97); border-right: 1px solid #ccc; z-index: 100; transition: transform 0.3s ease; }
-    .panel-left.collapsed { transform: translateX(-100%); }
+    .panel-left { display: none; }
+    .panel-left.collapsed { display: none; }
     .drawer-toggle { position: fixed; top: 52px; left: 0; width: 32px; height: 36px; background: #f5f5f5; border: 1px solid #ccc; border-left: none; border-radius: 0 6px 6px 0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #555; z-index: 200; transition: left 0.3s ease; }
     .drawer-toggle:hover { background: #e0e0e0; color: #000; }
     .panel-left h2 { font-size: 1rem; margin: 0 0 12px 0; color: #333; }
     .panel-right { width: 100%; height: 100%; }
-    .grid { display: grid; grid-template-columns: 20px 20px minmax(120px,1fr) minmax(120px,1fr) minmax(120px,1fr) 24px; gap: 6px 8px; align-items: center; }
+    .grid { display: grid; grid-template-columns: 20px 24px 24px minmax(150px,1fr) minmax(150px,1fr) minmax(150px,1fr) 32px 32px 36px 56px; gap: 6px 8px; align-items: center; }
     .grid .header { font-size: 11px; color: #666; }
     .grid .header.header-num { text-align: right; font-variant-numeric: tabular-nums; }
     .grid .row-num { font-size: 11px; color: #555; text-align: right; font-variant-numeric: tabular-nums; }
@@ -32,7 +32,7 @@
     .grid .vehicle-tag { font-size: 9px; font-weight: 700; padding: 2px 4px; border-radius: 3px; flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.03em; line-height: 1; white-space: nowrap; }
     .panel-right { position: relative; width: 100%; height: 100%; }
     #globeContainer { width: 100%; height: 100%; background: #0a0a12; }
-    .globe-toolbar { position: absolute; top: 10px; left: 10px; z-index: 10; display: flex; align-items: center; gap: 8px; }
+    .globe-toolbar { position: absolute; top: 10px; left: 10px; z-index: 1200; display: flex; align-items: center; gap: 8px; }
     .globe-toolbar label { font-size: 12px; color: #e0e0e0; cursor: pointer; user-select: none; }
     .globe-toolbar input[type="checkbox"] { cursor: pointer; }
     .toolbar { margin-bottom: 10px; }
@@ -43,10 +43,16 @@
     .site-title a { color: #333; text-decoration: none; font-weight: bold; font-size: 1rem; }
     .site-title a:hover { text-decoration: underline; }
   </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
-  <p class="site-title"><a href="index.html">&larr; ROAMY STUPID</a></p>
-  <button class="drawer-toggle" id="drawerToggle" title="Toggle panel">◀</button>
+  <p class="site-title">
+    <a href="index.html">&larr; ROAMY STUPID</a>
+    &nbsp;|&nbsp;
+    <a href="route_config.html">Edit routes</a>
+  </p>
+  <button class="drawer-toggle" id="drawerToggle" title="Toggle panel" style="display:none;">◀</button>
   <div class="layout">
     <div class="panel-left" id="panelLeft">
       <h2>41 × 3 triplets (stage1 | roamy | stage1)</h2>
@@ -72,10 +78,13 @@
     </script>
     <div class="panel-right">
       <div class="globe-toolbar">
-        <input type="checkbox" id="connect13Long" checked />
+        <input type="checkbox" id="connect13Long" />
         <label for="connect13Long">Complete loop</label>
+        <input type="checkbox" id="flatMapToggle" />
+        <label for="flatMapToggle">Flat map</label>
       </div>
       <div id="globeContainer"></div>
+      <div id="mapContainer" style="width:100%;height:100%;display:none;background:#e9edf2;"></div>
     </div>
   </div>
 
@@ -89,7 +98,7 @@
     import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
     import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 
-    const DATA = window.ROUTE_DATA;
+    function getData() { return window.ROUTE_DATA; }
     const ROWS = 41;
     const COLORS = ["#e6194b","#3cb44b","#ffe119","#4363d8","#f58231","#911eb4","#46f0f0","#f032e6","#bcf60c","#fabebe","#008080","#e6beff","#9a6324","#fffac8","#800000","#aaffc3","#808000","#ffd8b1","#000075","#808080","#e63946","#2a9d8f","#e9c46a","#1d3557","#457b9d","#a8dadc","#f4a261","#e76f51","#2ec4b6","#ff9f1c","#011627","#fdfffc","#41ead4","#ff006e","#8338ec","#3a86ff","#fb5607","#06d6a0","#118ab2","#ef476f","#ffd166","#073b4c"];
 
@@ -145,6 +154,57 @@
     let scene, camera, renderer, controls, routeLines = [], routeWrapLines = [], routeDots = [], routeLabelSprites = [];
     const DOT_RADIUS = 0.018;
     const LABEL_SIZE = 0.06;
+
+    // Flat map (Leaflet) support
+    const globeEl = document.getElementById("globeContainer");
+    const mapEl = document.getElementById("mapContainer");
+    const flatMapToggleEl = document.getElementById("flatMapToggle");
+    let map = null;
+    let mapLayers = [];
+
+    function ensureMap() {
+      if (map) return map;
+      map = L.map("mapContainer", { worldCopyJump: true }).setView([20, 0], 2);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 18,
+        attribution: "&copy; OpenStreetMap contributors"
+      }).addTo(map);
+      return map;
+    }
+
+    function clearMapRoutes() {
+      if (!map) return;
+      mapLayers.forEach(l => { try { map.removeLayer(l); } catch(e) {} });
+      mapLayers = [];
+    }
+
+    function latLonFromVector3(v) {
+      const y = Math.max(-1, Math.min(1, v.y));
+      const phi = Math.acos(y);
+      const lat = 90 - (phi * 180 / Math.PI);
+      const lon = Math.atan2(-v.z, v.x) * 180 / Math.PI;
+      return [lat, lon];
+    }
+
+    function splitDateline(latlngs) {
+      const segs = [];
+      let cur = [];
+      for (let i = 0; i < latlngs.length; i++) {
+        const p = latlngs[i];
+        if (cur.length) {
+          const prev = cur[cur.length - 1];
+          const d = Math.abs(p[1] - prev[1]);
+          if (d > 180) {
+            if (cur.length >= 2) segs.push(cur);
+            cur = [p];
+            continue;
+          }
+        }
+        cur.push(p);
+      }
+      if (cur.length >= 2) segs.push(cur);
+      return segs;
+    }
 
     function makeLabelTexture(num) {
       const c = document.createElement("canvas");
@@ -234,6 +294,16 @@
     }
 
     function updateRoutes() {
+      const flat = !!(flatMapToggleEl && flatMapToggleEl.checked);
+      if (flat) {
+        globeEl.style.display = "none";
+        mapEl.style.display = "block";
+        ensureMap();
+        setTimeout(() => { try { map.invalidateSize(); } catch(e) {} }, 50);
+      } else {
+        mapEl.style.display = "none";
+        globeEl.style.display = "block";
+      }
       if (!scene) return;
       routeLines.forEach(line => { if (line.parent) line.parent.remove(line); line.geometry.dispose(); line.material.dispose(); });
       routeLines = [];
@@ -243,6 +313,9 @@
       routeDots = [];
       routeLabelSprites.forEach(s => { if (s.parent) s.parent.remove(s); s.material.dispose(); });
       routeLabelSprites = [];
+      clearMapRoutes();
+      const DATA = getData();
+      if (!DATA || !DATA.locs || !DATA.roamy) return;
       const locCoords = DATA.locs;
       const roamyCoords = DATA.roamy;
       const resolution = new THREE.Vector2();
@@ -250,6 +323,8 @@
       const lineWidth = 2.5;
 
       for (let r = 0; r < ROWS; r++) {
+        const showEl = document.getElementById("show_" + r);
+        if (showEl && !showEl.checked) continue;
         const selLoc1 = document.getElementById("loc1_" + r);
         const selRoamy = document.getElementById("roamy_" + r);
         const selLoc2 = document.getElementById("loc2_" + r);
@@ -263,63 +338,99 @@
         if (!p1 || !pMid || !p2) continue;
         const col = new THREE.Color(COLORS[r % COLORS.length]);
         const pts = routePoints(p1.lat, p1.lon, pMid.lat, pMid.lon, p2.lat, p2.lon, 40);
-        const pos = [];
-        pts.forEach(p => { pos.push(p.x, p.y, p.z); });
-        const lineGeo = new LineGeometry();
-        lineGeo.setPositions(pos);
-        const lineMat = new LineMaterial({ color: col, linewidth: lineWidth, resolution });
-        const line = new Line2(lineGeo, lineMat);
-        scene.add(line);
-        routeLines.push(line);
-        const connect13Long = document.getElementById("connect13Long");
-        if (connect13Long && connect13Long.checked) {
-          const v1 = latLonToVector3(p1.lat, p1.lon);
-          const v3 = latLonToVector3(p2.lat, p2.lon);
-          const wrapPts = slerpLongArc(v1, v3, 80);
-          const wrapPos = [];
-          wrapPts.forEach(p => { wrapPos.push(p.x, p.y, p.z); });
-          const wrapGeo = new LineGeometry();
-          wrapGeo.setPositions(wrapPos);
-          const wrapMat = new LineMaterial({ color: col, linewidth: lineWidth, resolution, opacity: 0.85, transparent: true });
-          const wrapLine = new Line2(wrapGeo, wrapMat);
-          scene.add(wrapLine);
-          routeWrapLines.push(wrapLine);
+
+        if (!flat) {
+          const pos = [];
+          pts.forEach(p => { pos.push(p.x, p.y, p.z); });
+          const lineGeo = new LineGeometry();
+          lineGeo.setPositions(pos);
+          const lineMat = new LineMaterial({ color: col, linewidth: lineWidth, resolution });
+          const line = new Line2(lineGeo, lineMat);
+          scene.add(line);
+          routeLines.push(line);
+          const connect13Long = document.getElementById("connect13Long");
+          if (connect13Long && connect13Long.checked) {
+            const v1 = latLonToVector3(p1.lat, p1.lon);
+            const v3 = latLonToVector3(p2.lat, p2.lon);
+            const wrapPts = slerpLongArc(v1, v3, 80);
+            const wrapPos = [];
+            wrapPts.forEach(p => { wrapPos.push(p.x, p.y, p.z); });
+            const wrapGeo = new LineGeometry();
+            wrapGeo.setPositions(wrapPos);
+            const wrapMat = new LineMaterial({ color: col, linewidth: lineWidth, resolution, opacity: 0.85, transparent: true });
+            const wrapLine = new Line2(wrapGeo, wrapMat);
+            scene.add(wrapLine);
+            routeWrapLines.push(wrapLine);
+          }
+          const points = [p1, pMid, p2];
+          points.forEach((p, idx) => {
+            const pos = latLonToVector3(p.lat, p.lon);
+            const dot = new THREE.Mesh(
+              new THREE.SphereGeometry(DOT_RADIUS, 16, 12),
+              new THREE.MeshBasicMaterial({ color: col })
+            );
+            dot.position.copy(pos);
+            scene.add(dot);
+            routeDots.push(dot);
+            const label = addLabelSprite(idx + 1, pos);
+            scene.add(label);
+            routeLabelSprites.push(label);
+          });
+        } else {
+          ensureMap();
+          const latlngs = pts.map(v => latLonFromVector3(v));
+          splitDateline(latlngs).forEach(seg => {
+            const pl = L.polyline(seg, { color: col.getStyle(), weight: 3, opacity: 0.85 });
+            pl.addTo(map);
+            mapLayers.push(pl);
+          });
         }
-        const points = [p1, pMid, p2];
-        points.forEach((p, idx) => {
-          const pos = latLonToVector3(p.lat, p.lon);
-          const dot = new THREE.Mesh(
-            new THREE.SphereGeometry(DOT_RADIUS, 16, 12),
-            new THREE.MeshBasicMaterial({ color: col })
-          );
-          dot.position.copy(pos);
-          scene.add(dot);
-          routeDots.push(dot);
-          const label = addLabelSprite(idx + 1, pos);
-          scene.add(label);
-          routeLabelSprites.push(label);
-        });
       }
     }
 
     window.initGlobe = initGlobe;
     window.updateRoutes = updateRoutes;
     initGlobe();
+    if (flatMapToggleEl) {
+      try {
+        flatMapToggleEl.checked = localStorage.getItem("roamyGlobeFlatMap") === "true";
+      } catch (e) {}
+    }
     updateRoutes();
     const connect13LongEl = document.getElementById("connect13Long");
     if (connect13LongEl) connect13LongEl.addEventListener("change", updateRoutes);
+    if (flatMapToggleEl) flatMapToggleEl.addEventListener("change", function() {
+      try { localStorage.setItem("roamyGlobeFlatMap", flatMapToggleEl.checked); } catch (e) {}
+      updateRoutes();
+    });
   </script>
   <script>
     (function() {
-      const DATA = {"locs": [{"name": "maputo, Mozambique", "lat": -25.9692, "lon": 32.5732}, {"name": "kandi, Benin", "lat": 11.1342, "lon": 2.9386}, {"name": "seoul, South Korea", "lat": 37.5665, "lon": 126.978}, {"name": "cairo, Egypt", "lat": 30.0444, "lon": 31.2357}, {"name": "lower hutt, New Zealand", "lat": -41.207, "lon": 174.9053}, {"name": "ankara, Turkey", "lat": 39.9334, "lon": 32.8597}, {"name": "tbilisi, Georgia", "lat": 41.7151, "lon": 44.8271}, {"name": "toad suck, AR", "lat": 35.089, "lon": -92.555}, {"name": "tijuana, Mexico", "lat": 32.5149, "lon": -117.0382}, {"name": "armavir, Armenia", "lat": 40.1545, "lon": 44.0382}, {"name": "doha, Qatar", "lat": 25.2854, "lon": 51.531}, {"name": "moscow, Russia", "lat": 55.7558, "lon": 37.6173}, {"name": "accra, Ghana", "lat": 5.6037, "lon": -0.187}, {"name": "kabul, Afghanistan", "lat": 34.5553, "lon": 69.2075}, {"name": "arles, France", "lat": 43.6766, "lon": 4.6278}, {"name": "kupang, Indonesia", "lat": -10.1833, "lon": 123.5833}, {"name": "lahore, Pakistan", "lat": 31.5204, "lon": 74.3587}, {"name": "lima, Peru", "lat": -12.0464, "lon": -77.0428}, {"name": "tashkent, Uzbekistan", "lat": 41.2995, "lon": 69.2401}, {"name": "tallinn, Estonia", "lat": 59.437, "lon": 24.7536}, {"name": "new orleans, LA", "lat": 29.9511, "lon": -90.0715}, {"name": "yellowstone, WY", "lat": 44.428, "lon": -110.5885}, {"name": "casablanca, Morocco", "lat": 33.5731, "lon": -7.5898}, {"name": "north york, Ontario, Canada", "lat": 43.7615, "lon": -79.4111}, {"name": "algiers, Algeria", "lat": 36.7538, "lon": 3.0588}, {"name": "tampa bay, FL", "lat": 27.9506, "lon": -82.4572}, {"name": "wichita, KS", "lat": 37.6872, "lon": -97.3301}, {"name": "tierra del fuego, Argentina", "lat": -54.8019, "lon": -68.303}, {"name": "dekalb, IL", "lat": 41.9295, "lon": -88.7504}, {"name": "montreal, Canada", "lat": 45.5017, "lon": -73.5673}, {"name": "cairns, Queensland, Australia", "lat": -16.9186, "lon": 145.7781}, {"name": "divo, C\u00f4te d'Ivoire", "lat": 5.8431, "lon": -5.361}, {"name": "copenhagen, Denmark", "lat": 55.6761, "lon": 12.5683}, {"name": "buffalo, NY", "lat": 42.8864, "lon": -78.8784}, {"name": "sucre, Bolivia", "lat": -19.0196, "lon": -65.262}, {"name": "quito, Ecuador", "lat": -0.2202, "lon": -78.5123}, {"name": "south pole, Antarctica", "lat": -90.0, "lon": 0.0}, {"name": "mal\u00e9, Maldives", "lat": 4.1755, "lon": 73.5093}, {"name": "iturup, Russia", "lat": 45.25, "lon": 147.8167}, {"name": "yellowknife, Canada", "lat": 62.454, "lon": -114.3718}, {"name": "thane, India", "lat": 19.2183, "lon": 72.9789}, {"name": "nazar\u00e9, Portugal", "lat": 39.6012, "lon": -9.0711}, {"name": "nome, AK", "lat": 64.5011, "lon": -165.4064}, {"name": "dimtu, Ethiopia", "lat": 6.9, "lon": 37.75}, {"name": "antananarivo, Madagascar", "lat": -18.8792, "lon": 47.5079}, {"name": "gaborone, Botswana", "lat": -24.6282, "lon": 25.9231}, {"name": "heard island, Australia", "lat": -53.0817, "lon": 73.5042}, {"name": "ile de la possession, France", "lat": -46.4167, "lon": 51.75}, {"name": "ascension island, United Kingdom", "lat": -7.9467, "lon": -14.3558}, {"name": "eyjafjallajokull, Iceland", "lat": 63.6333, "lon": -19.6167}], "roamy": [{"name": "casper, WY", "lat": 42.8666, "lon": -106.3131}, {"name": "arzamas, Russia", "lat": 55.3833, "lon": 43.8167}, {"name": "mubi, Nigeria", "lat": 10.2667, "lon": 13.2667}, {"name": "baku, Azerbaijan", "lat": 40.4093, "lon": 49.8671}, {"name": "moora, Australia", "lat": -30.6333, "lon": 116.0}, {"name": "surat, India", "lat": 21.1702, "lon": 72.8311}, {"name": "marquette, MI", "lat": 46.5436, "lon": -87.3954}, {"name": "beatty, NV", "lat": 36.9086, "lon": -116.7592}, {"name": "mosul, Iraq", "lat": 36.34, "lon": 43.13}, {"name": "visby, Sweden", "lat": 57.6348, "lon": 18.2948}, {"name": "istanbul, Turkey", "lat": 41.0082, "lon": 28.9784}, {"name": "genoa, Italy", "lat": 44.4056, "lon": 8.9463}, {"name": "mayotte, France", "lat": -12.8275, "lon": 45.1662}, {"name": "giresun, Turkey", "lat": 40.9128, "lon": 38.3895}, {"name": "l'ascension, Quebec", "lat": 48.6833, "lon": -71.6833}, {"name": "okato, New Zealand", "lat": -39.1833, "lon": 173.8833}, {"name": "nova russas, Brazil", "lat": -5.5667, "lon": -40.5667}, {"name": "\u010desk\u00e9 bud\u011bjovice, Czechia", "lat": 48.9745, "lon": 14.4747}, {"name": "christchurch, New Zealand", "lat": -43.5321, "lon": 172.6362}, {"name": "castelo branco, Portugal", "lat": 39.8222, "lon": -7.4908}, {"name": "sokode, Togo", "lat": 8.9833, "lon": 1.1333}, {"name": "curic\u00f3, Chile", "lat": -34.9828, "lon": -71.2394}, {"name": "monkey bay, Malawi", "lat": -14.0833, "lon": 34.9167}, {"name": "antalya, Turkey", "lat": 36.8969, "lon": 30.7133}, {"name": "ambanja, Madagascar", "lat": -13.6833, "lon": 48.45}, {"name": "saint-pierre, Saint Pierre and Miquelon", "lat": 46.7811, "lon": -56.1764}, {"name": "krasnodar, Russia", "lat": 45.035, "lon": 38.975}, {"name": "tucum\u00e1n, Argentina", "lat": -26.8083, "lon": -65.2172}, {"name": "derby, Western Australia", "lat": -17.3034, "lon": 123.6286}, {"name": "manaus, Brazil", "lat": -3.119, "lon": -60.0217}, {"name": "pune, India", "lat": 18.5204, "lon": 73.8567}, {"name": "hasik, Oman", "lat": 17.4833, "lon": 55.0333}, {"name": "velingrad, Bulgaria", "lat": 42.0167, "lon": 23.9833}, {"name": "marrakesh, Morocco", "lat": 31.6295, "lon": -7.9811}, {"name": "orlando, FL", "lat": 28.5383, "lon": -81.3792}, {"name": "charlotte, NC", "lat": 35.2271, "lon": -80.8431}, {"name": "edmonton, Canada", "lat": 53.5461, "lon": -113.4938}, {"name": "vladivostok, Russia", "lat": 43.1198, "lon": 131.8869}, {"name": "cochabamba, Bolivia", "lat": -17.3935, "lon": -66.157}, {"name": "tacurong, The Philippines", "lat": 6.6833, "lon": 124.6833}, {"name": "manistee, MI", "lat": 44.2445, "lon": -86.3242}]};
-      window.ROUTE_DATA = DATA;
-      const ROWS = 41;
-      const COLORS = ["#e6194b","#3cb44b","#ffe119","#4363d8","#f58231","#911eb4","#46f0f0","#f032e6","#bcf60c","#fabebe","#008080","#e6beff","#9a6324","#fffac8","#800000","#aaffc3","#808000","#ffd8b1","#000075","#808080","#e63946","#2a9d8f","#e9c46a","#1d3557","#457b9d","#a8dadc","#f4a261","#e76f51","#2ec4b6","#ff9f1c","#011627","#fdfffc","#41ead4","#ff006e","#8338ec","#3a86ff","#fb5607","#06d6a0","#118ab2","#ef476f","#ffd166","#073b4c"];
-      const grid = document.getElementById("tripletGrid");
+      var DATA, ROWS, COLORS, grid, vehicleIcons;
+      var STAGE1_VEHICLE_COLOR = {}, ROAMY_VEHICLE_COLOR = {}, ROAMY_FIRST_LETTER = {};
+      var rowLetterCells = {}, rowModeCells = {};
+      var colorMap = { brown: "#8B4513", gold: "#DAA520", green: "#228B22", purple: "#7B2D8B", silver: "#999", black: "#222", blue: "#2266CC", red: "#CC2222", yellow: "#CCAA00" };
+      var ROUTE_CONFIG_KEY = "roamyRouteConfigRows";
+      function initFromPuzzleData(pd) {
+        var s1 = pd.stage1_locations || [], s2 = pd.roamy_locations || [];
+        DATA = { locs: s1.map(function(l){ return { name: l.name, lat: l.lat, lon: l.lon }; }), roamy: s2.map(function(l){ return { name: l.name, lat: l.lat, lon: l.lon }; }) };
+        window.ROUTE_DATA = DATA;
+        ROWS = 41;
+        COLORS = ["#e6194b","#3cb44b","#ffe119","#4363d8","#f58231","#911eb4","#46f0f0","#f032e6","#bcf60c","#fabebe","#008080","#e6beff","#9a6324","#fffac8","#800000","#aaffc3","#808000","#ffd8b1","#000075","#808080","#e63946","#2a9d8f","#e9c46a","#1d3557","#457b9d","#a8dadc","#f4a261","#e76f51","#2ec4b6","#ff9f1c","#011627","#fdfffc","#41ead4","#ff006e","#8338ec","#3a86ff","#fb5607","#06d6a0","#118ab2","#ef476f","#ffd166","#073b4c"];
+        s1.forEach(function(l){ if(l.vehicle_color) STAGE1_VEHICLE_COLOR[l.name]=l.vehicle_color; });
+        s2.forEach(function(l){ if(l.vehicle_color) ROAMY_VEHICLE_COLOR[l.name]=l.vehicle_color; if(l.letter) ROAMY_FIRST_LETTER[l.name]=l.letter; });
+        vehicleIcons = pd.row_vehicle_colors || {};
+      }
+      fetch("puzzle_data.json").then(function(r){ return r.ok ? r.json() : null; }).then(function(puzzleData) {
+        if (!puzzleData) return;
+        initFromPuzzleData(puzzleData);
+        grid = document.getElementById("tripletGrid"); 
       grid.appendChild(document.createElement("div")).className = "header";
       grid.lastChild.textContent = "";
       grid.appendChild(document.createElement("div")).className = "header header-num";
       grid.lastChild.textContent = "#";
+      grid.appendChild(document.createElement("div")).className = "header";
+      grid.lastChild.innerHTML = '<span title="Show arc on globe">Show</span>';
       grid.appendChild(document.createElement("div")).className = "header";
       grid.lastChild.innerHTML = '<span class="col-num">1</span>Location (start)';
       grid.appendChild(document.createElement("div")).className = "header";
@@ -327,35 +438,36 @@
       grid.appendChild(document.createElement("div")).className = "header";
       grid.lastChild.innerHTML = '<span class="col-num">3</span>Location (end)';
       grid.appendChild(document.createElement("div")).className = "header";
-      grid.lastChild.textContent = "";
+      grid.lastChild.textContent = "";      // clear button column
+      grid.appendChild(document.createElement("div")).className = "header";
+      grid.lastChild.textContent = "Letter";
+      grid.appendChild(document.createElement("div")).className = "header";
+      grid.lastChild.textContent = "Mode";
 
-      // Vehicle icons from tripsByRoamy.csv: row → [icon1, icon2, icon3]
-      var vehicleIcons = {
-        0:  ["brown-boat",null,"brown-boat"],
-        1:  ["brown-boat","black-car","gold-boat"],
-        2:  ["gold-boat","blue-car","silver-boat"],
-        6:  ["purple-boat","green-car","gold-boat"],
-        7:  ["gold-boat","black-car","gold-boat"],
-        10: ["silver-boat","red-car","green-boat"],
-        12: ["green-boat","red-car","brown-boat"],
-        14: ["brown-boat","purple-car","purple-boat"],
-        17: ["purple-boat","yellow-horse","gold-boat"],
-        19: ["green-boat","black-horse","purple-boat"],
-        20: ["purple-boat","blue-horse","purple-boat"],
-        23: ["brown-boat","green-horse","silver-boat"],
-        24: ["silver-boat","red-horse","silver-boat"],
-        29: ["purple-boat","blue-plane","silver-boat"],
-        30: ["green-boat","green-plane","green-boat"],
-        33: ["brown-boat","purple-plane","gold-boat"],
-        35: ["green-boat","red-plane","gold-boat"],
-        37: ["brown-boat","green-plane","silver-boat"],
-        40: ["gold-boat","green-plane","purple-boat"]
-      };
-      var colorMap = {
-        brown: "#8B4513", gold: "#DAA520", green: "#228B22",
-        purple: "#7B2D8B", silver: "#999", black: "#222",
-        blue: "#2266CC", red: "#CC2222", yellow: "#CCAA00"
-      };
+      function allowedRoamyIndicesForRow(row) {
+        var wantVc = (vehicleIcons[row] || [null, null, null])[1];
+        if (!wantVc) return DATA.roamy.map(function(_, i) { return i; });
+        var out = [];
+        DATA.roamy.forEach(function(l, i) {
+          if (ROAMY_VEHICLE_COLOR[l.name] === wantVc) out.push(i);
+        });
+        return out.length ? out : DATA.roamy.map(function(_, i) { return i; });
+      }
+
+      function allowedLocIndicesFor(row, pos) {
+        var icon = (vehicleIcons[row] || [null,null,null])[pos];
+        if (!icon) {
+          return DATA.locs.map(function(_, i) { return i; });
+        }
+        var need = icon; // e.g. "brown-boat"
+        var out = [];
+        DATA.locs.forEach(function(l, i) {
+          if (STAGE1_VEHICLE_COLOR[l.name] === need) out.push(i);
+        });
+        // Fallback: if filtering removed everything, allow all.
+        return out.length ? out : DATA.locs.map(function(_, i) { return i; });
+      }
+
       function makeCell(selectEl, iconCode) {
         var wrap = document.createElement("div");
         wrap.className = "cell-wrap";
@@ -374,6 +486,79 @@
         wrap.appendChild(selectEl);
         return wrap;
       }
+      function roamyModeForIndex(idx) {
+        if (idx <= 0 || idx >= DATA.roamy.length) {
+          if (idx === 0) return "CAR"; // manistee example row 0
+          return "";
+        }
+        if (idx >= 0 && idx <= 14) return "CAR";
+        if (idx >= 15 && idx <= 23) return "HORSE";
+        return "PLANE";
+      }
+
+      function updateRowLetter(r) {
+        var letterCell = rowLetterCells[r];
+        var modeCell = rowModeCells[r];
+        if (!letterCell || !modeCell) return;
+        if (r === 0) {
+          letterCell.textContent = "";
+          letterCell.title = "";
+          modeCell.textContent = "";
+          modeCell.title = "";
+          return;
+        }
+        var s2 = document.getElementById("roamy_" + r);
+        if (!s2 || s2.value === "") {
+          letterCell.textContent = "";
+          letterCell.title = "";
+          modeCell.textContent = "";
+          modeCell.title = "";
+          return;
+        }
+        var idx = parseInt(s2.value, 10);
+        if (isNaN(idx) || !DATA.roamy[idx]) {
+          letterCell.textContent = "";
+          letterCell.title = "";
+          modeCell.textContent = "";
+          modeCell.title = "";
+          return;
+        }
+        var roamyName = DATA.roamy[idx].name;
+        var letter = ROAMY_FIRST_LETTER[roamyName] || "";
+        var mode = roamyModeForIndex(idx);
+        letterCell.textContent = letter;
+        letterCell.title = roamyName + " → " + (letter || "?");
+        modeCell.textContent = mode;
+        modeCell.title = roamyName + " (" + (mode ? mode.toLowerCase() : "") + ")";
+      }
+
+      function getUsedRoamyIndices(excludeRow) {
+        var used = new Set();
+        for (var r = 0; r < ROWS; r++) {
+          if (r === excludeRow) continue;
+          var s2 = document.getElementById("roamy_" + r);
+          if (!s2 || !s2.value) continue;
+          var idx = parseInt(s2.value, 10);
+          if (!isNaN(idx)) used.add(idx);
+        }
+        return used;
+      }
+
+      function rebuildRoamyOptions(row) {
+        var s2 = document.getElementById("roamy_" + row);
+        if (!s2) return;
+        var current = s2.value;
+        var used = getUsedRoamyIndices(row);
+        var allowed = allowedRoamyIndicesForRow(row);
+        var opts = ['<option value=""></option>'];
+        allowed.forEach(function(i) {
+          if (used.has(i) && String(i) !== current) return;
+          var l = DATA.roamy[i];
+          opts.push('<option value="'+i+'"'+(String(i)===current?' selected':'')+'>'+escapeHtml(l.name)+'</option>');
+        });
+        s2.innerHTML = opts.join("");
+      }
+
       for (let r = 0; r < ROWS; r++) {
         const swatch = document.createElement("div");
         swatch.className = "row-swatch";
@@ -384,18 +569,34 @@
         rowNum.className = "row-num";
         rowNum.textContent = r;
         grid.appendChild(rowNum);
+        const showCb = document.createElement("input");
+        showCb.type = "checkbox";
+        showCb.id = "show_" + r;
+        showCb.checked = true;
+        showCb.title = "Show row " + r + " arc on globe";
+        showCb.style.cursor = "pointer";
+        grid.appendChild(showCb);
         var icons = vehicleIcons[r] || [null, null, null];
         const s1 = document.createElement("select");
         s1.id = "loc1_" + r;
-        s1.innerHTML = '<option value=""></option>' + DATA.locs.map((l,i) => '<option value="'+i+'">'+escapeHtml(l.name)+'</option>').join("");
+        s1.innerHTML = '<option value=""></option>' + allowedLocIndicesFor(r, 0).map(function(i) {
+          var l = DATA.locs[i];
+          return '<option value="'+i+'">'+escapeHtml(l.name)+'</option>';
+        }).join("");
         grid.appendChild(makeCell(s1, icons[0]));
         const s2 = document.createElement("select");
         s2.id = "roamy_" + r;
-        s2.innerHTML = '<option value=""></option>' + DATA.roamy.map((l,i) => '<option value="'+i+'">'+escapeHtml(l.name)+'</option>').join("");
+        s2.innerHTML = '<option value=""></option>' + allowedRoamyIndicesForRow(r).map(function(i) {
+          var l = DATA.roamy[i];
+          return '<option value="'+i+'">'+escapeHtml(l.name)+'</option>';
+        }).join("");
         grid.appendChild(makeCell(s2, icons[1]));
         const s3 = document.createElement("select");
         s3.id = "loc2_" + r;
-        s3.innerHTML = '<option value=""></option>' + DATA.locs.map((l,i) => '<option value="'+i+'">'+escapeHtml(l.name)+'</option>').join("");
+        s3.innerHTML = '<option value=""></option>' + allowedLocIndicesFor(r, 2).map(function(i) {
+          var l = DATA.locs[i];
+          return '<option value="'+i+'">'+escapeHtml(l.name)+'</option>';
+        }).join("");
         grid.appendChild(makeCell(s3, icons[2]));
         const clearBtn = document.createElement("button");
         clearBtn.className = "row-clear";
@@ -404,10 +605,39 @@
         clearBtn.title = "Clear row " + r;
         clearBtn.addEventListener("click", function() {
           s1.value = ""; s2.value = ""; s3.value = "";
+          updateRowLetter(r);
+          saveConfigToStorage();
           if (window.updateRoutes) window.updateRoutes();
         });
         grid.appendChild(clearBtn);
-        [s1, s2, s3].forEach(s => s.addEventListener("change", () => window.updateRoutes && window.updateRoutes()));
+        var letterCell = document.createElement("div");
+        letterCell.style.textAlign = "center";
+        letterCell.style.fontFamily = "ui-monospace, monospace";
+        letterCell.style.fontWeight = "700";
+        letterCell.style.fontSize = "13px";
+        letterCell.textContent = "";
+        letterCell.title = "";
+        grid.appendChild(letterCell);
+        rowLetterCells[r] = letterCell;
+        var modeCell = document.createElement("div");
+        modeCell.style.textAlign = "center";
+        modeCell.style.fontSize = "11px";
+        modeCell.style.fontWeight = "600";
+        modeCell.style.textTransform = "uppercase";
+        modeCell.style.letterSpacing = "0.03em";
+        modeCell.style.color = "#555";
+        modeCell.textContent = "";
+        modeCell.title = "";
+        grid.appendChild(modeCell);
+        rowModeCells[r] = modeCell;
+        showCb.addEventListener("change", () => { saveConfigToStorage(); window.updateRoutes && window.updateRoutes(); });
+        s1.addEventListener("change", () => { saveConfigToStorage(); window.updateRoutes && window.updateRoutes(); });
+        s3.addEventListener("change", () => { saveConfigToStorage(); window.updateRoutes && window.updateRoutes(); });
+        s2.addEventListener("change", () => { updateRowLetter(r); saveConfigToStorage(); window.updateRoutes && window.updateRoutes(); });
+        s2.addEventListener("focus", () => rebuildRoamyOptions(r));
+        s2.addEventListener("mousedown", () => rebuildRoamyOptions(r));
+        // Initialize letters after any pre-filled config load
+        updateRowLetter(r);
       }
       function escapeHtml(s) {
         const d = document.createElement("div");
@@ -422,93 +652,107 @@
         DATA.roamy.forEach(function(l, i) { nameToRoamyIndex[l.name] = i; });
         for (var i = 0; i < 41; i++) {
           var s1 = document.getElementById("loc1_" + i), s2 = document.getElementById("roamy_" + i), s3 = document.getElementById("loc2_" + i);
+          var showEl = document.getElementById("show_" + i);
           if (s1) s1.value = ""; if (s2) s2.value = ""; if (s3) s3.value = "";
+          if (showEl) showEl.checked = true;
         }
         for (var i = 0; i < rows.length; i++) {
           var row = rows[i];
           var r = (typeof row.row === "number" && row.row >= 0 && row.row < 41) ? row.row : i;
           var s1 = document.getElementById("loc1_" + r), s2 = document.getElementById("roamy_" + r), s3 = document.getElementById("loc2_" + r);
+          var showEl = document.getElementById("show_" + r);
           if (!s1 || !s2 || !s3) continue;
           if (row.loc1 !== undefined && row.loc1 !== "" && nameToLocIndex[row.loc1] !== undefined) s1.value = String(nameToLocIndex[row.loc1]);
           if (row.roamy !== undefined && row.roamy !== "" && nameToRoamyIndex[row.roamy] !== undefined) s2.value = String(nameToRoamyIndex[row.roamy]);
           if (row.loc2 !== undefined && row.loc2 !== "" && nameToLocIndex[row.loc2] !== undefined) s3.value = String(nameToLocIndex[row.loc2]);
+          if (showEl && row.visible !== undefined) showEl.checked = !!row.visible;
         }
+        for (var i = 0; i < 41; i++) updateRowLetter(i);
         if (window.updateRoutes) window.updateRoutes();
       }
-      var confirmedCells = {
-        0: { loc1: true, roamy: true, loc2: true },
-        2: { roamy: true },
-        20: { roamy: true },
-        23: { roamy: true },
-        29: { roamy: true }
-      };
-      var probableCells = {
-        1: { loc1: true, roamy: true, loc2: true },
-        2: { loc1: true, loc2: true },
-        7: { loc1: true, roamy: true, loc2: true },
-        14: { loc1: true, roamy: true, loc2: true },
-        20: { loc1: true, loc2: true },
-        23: { loc1: true, loc2: true },
-        29: { loc1: true, loc2: true },
-        30: { loc1: true, roamy: true, loc2: true },
-        37: { loc1: true, roamy: true, loc2: true }
-      };
-      var speculativeCells = {
-        3: { loc1: true, roamy: true, loc2: true },
-        4: { loc1: true, roamy: true, loc2: true },
-        5: { loc1: true, roamy: true, loc2: true },
-        6: { loc1: true, roamy: true, loc2: true },
-        8: { loc1: true, roamy: true, loc2: true },
-        9: { loc1: true, roamy: true, loc2: true },
-        10: { loc1: true, roamy: true, loc2: true },
-        11: { loc1: true, roamy: true, loc2: true },
-        12: { loc1: true, roamy: true, loc2: true },
-        13: { loc1: true, roamy: true, loc2: true },
-        15: { loc1: true, roamy: true, loc2: true },
-        16: { loc1: true, roamy: true, loc2: true },
-        17: { loc1: true, roamy: true, loc2: true },
-        18: { loc1: true, roamy: true, loc2: true },
-        19: { loc1: true, roamy: true, loc2: true },
-        21: { loc1: true, roamy: true, loc2: true },
-        22: { loc1: true, roamy: true, loc2: true },
-        24: { loc1: true, roamy: true, loc2: true },
-        25: { loc1: true, roamy: true, loc2: true },
-        26: { loc1: true, roamy: true, loc2: true },
-        27: { loc1: true, roamy: true, loc2: true },
-        28: { loc1: true, roamy: true, loc2: true },
-        31: { loc1: true, roamy: true, loc2: true },
-        32: { loc1: true, roamy: true, loc2: true },
-        33: { loc1: true, roamy: true, loc2: true },
-        34: { loc1: true, roamy: true, loc2: true },
-        35: { loc1: true, roamy: true, loc2: true },
-        36: { loc1: true, roamy: true, loc2: true },
-        38: { loc1: true, roamy: true, loc2: true },
-        39: { loc1: true, roamy: true, loc2: true },
-        40: { loc1: true, roamy: true, loc2: true }
-      };
-      function applyHighlights() {
-        var maps = [
-          [confirmedCells, 'confirmed'],
-          [probableCells, 'probable'],
-          [speculativeCells, 'speculative']
-        ];
-        maps.forEach(function(pair) {
-          var cells = pair[0], cls = pair[1];
-          for (var row in cells) {
-            var c = cells[row];
-            ['loc1', 'roamy', 'loc2'].forEach(function(pos) {
-              if (c[pos]) {
-                var sel = document.getElementById(pos + '_' + row);
-                if (sel && sel.value !== '') sel.classList.add(cls);
-              }
-            });
-          }
+      function clearHighlightClasses() {
+        for (var r = 0; r < ROWS; r++) {
+          ['loc1', 'roamy', 'loc2'].forEach(function(pos) {
+            var sel = document.getElementById(pos + '_' + r);
+            if (sel) sel.classList.remove('confirmed', 'probable', 'speculative');
+          });
+        }
+      }
+      function applyHighlightsFromConfig(obj) {
+        clearHighlightClasses();
+        if (!obj || !obj.rows) return;
+        var rows = obj.rows;
+        rows.forEach(function(row) {
+          if (typeof row.row !== "number") return;
+          var r = row.row;
+          ['loc1', 'roamy', 'loc2'].forEach(function(pos) {
+            var status = row[pos + '_status'];
+            if (!status) return;
+            var sel = document.getElementById(pos + '_' + r);
+            if (sel && sel.value !== '') sel.classList.add(status);
+          });
         });
       }
-      fetch("route_config.json").then(function(r) { return r.ok ? r.json() : null; }).then(function(obj) {
-        if (obj && obj.rows) { loadConfig(obj); applyHighlights(); }
+      function buildConfigObject() {
+        function statusFor(pos, r) {
+          var sel = document.getElementById(pos + '_' + r);
+          if (!sel) return "";
+          if (sel.classList.contains('confirmed')) return 'confirmed';
+          if (sel.classList.contains('probable')) return 'probable';
+          if (sel.classList.contains('speculative')) return 'speculative';
+          return "";
+        }
+        var rows = [];
+        for (var r = 0; r < ROWS; r++) {
+          var s1 = document.getElementById("loc1_" + r);
+          var s2 = document.getElementById("roamy_" + r);
+          var s3 = document.getElementById("loc2_" + r);
+          var loc1 = "", roamy = "", loc2 = "";
+          if (s1 && s1.value !== "") {
+            var i1 = parseInt(s1.value, 10);
+            if (!isNaN(i1) && DATA.locs[i1]) loc1 = DATA.locs[i1].name;
+          }
+          if (s2 && s2.value !== "") {
+            var i2 = parseInt(s2.value, 10);
+            if (!isNaN(i2) && DATA.roamy[i2]) roamy = DATA.roamy[i2].name;
+          }
+          if (s3 && s3.value !== "") {
+            var i3 = parseInt(s3.value, 10);
+            if (!isNaN(i3) && DATA.locs[i3]) loc2 = DATA.locs[i3].name;
+          }
+          var showEl = document.getElementById("show_" + r);
+          rows.push({
+            row: r,
+            loc1: loc1,
+            roamy: roamy,
+            loc2: loc2,
+            visible: showEl ? showEl.checked : true,
+            loc1_status: statusFor('loc1', r),
+            roamy_status: statusFor('roamy', r),
+            loc2_status: statusFor('loc2', r)
+          });
+        }
+        return { rows: rows };
+      }
+      function saveConfigToStorage() {
+        try {
+          var rows = buildConfigObject().rows;
+          localStorage.setItem(ROUTE_CONFIG_KEY, JSON.stringify(rows));
+        } catch (e) {}
+      }
+        var rowsToLoad = puzzleData.rows || [];
+        try {
+          var saved = localStorage.getItem(ROUTE_CONFIG_KEY);
+          if (saved) {
+            var parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length) rowsToLoad = parsed;
+          }
+        } catch (e) {}
+        loadConfig({ rows: rowsToLoad });
+        applyHighlightsFromConfig({ rows: rowsToLoad });
       }).catch(function() {});
     })();
   </script>
 </body>
 </html>
+

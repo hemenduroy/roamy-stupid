@@ -1,250 +1,373 @@
 {
   "rows": [
     {
+      "row": 0,
       "loc1": "dekalb, IL",
       "roamy": "manistee, MI",
       "loc2": "eyjafjallajokull, Iceland",
-      "row": 0
+      "loc1_status": "confirmed",
+      "roamy_status": "confirmed",
+      "loc2_status": "confirmed"
     },
     {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 1
+      "row": 1,
+      "loc1": "tijuana, Mexico",
+      "roamy": "beatty, NV",
+      "loc2": "yellowknife, Canada",
+      "loc1_status": "probable",
+      "roamy_status": "confirmed",
+      "loc2_status": "probable"
     },
     {
+      "row": 2,
       "loc1": "copenhagen, Denmark",
       "roamy": "l'ascension, Quebec",
       "loc2": "north york, Ontario, Canada",
-      "row": 2
+      "loc1_status": "probable",
+      "roamy_status": "confirmed",
+      "loc2_status": "probable"
     },
     {
-      "loc1": "",
-      "roamy": "",
+      "row": 3,
+      "loc1": "ankara, Turkey",
+      "roamy": "marquette, MI",
+      "loc2": "thane, India",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 4,
+      "loc1": "algiers, Algeria",
+      "roamy": "casper, WY",
+      "loc2": "tampa bay, FL",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 5,
+      "loc1": "ankara, Turkey",
+      "roamy": "arzamas, Russia",
+      "loc2": "tbilisi, Georgia",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 6,
+      "loc1": "wichita, KS",
+      "roamy": "visby, Sweden",
       "loc2": "",
-      "row": 3
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": ""
     },
     {
+      "row": 7,
+      "loc1": "copenhagen, Denmark",
+      "roamy": "genoa, Italy",
+      "loc2": "kandi, Benin",
+      "loc1_status": "probable",
+      "roamy_status": "confirmed",
+      "loc2_status": "probable"
+    },
+    {
+      "row": 8,
+      "loc1": "divo, Côte d'Ivoire",
+      "roamy": "mubi, Nigeria",
+      "loc2": "nazaré, Portugal",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 9,
+      "loc1": "lahore, Pakistan",
+      "roamy": "mosul, Iraq",
+      "loc2": "heard island, Australia",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 10,
       "loc1": "",
-      "roamy": "",
+      "roamy": "istanbul, Turkey",
       "loc2": "",
-      "row": 4
+      "loc1_status": "",
+      "roamy_status": "confirmed",
+      "loc2_status": ""
     },
     {
+      "row": 11,
+      "loc1": "tallinn, Estonia",
+      "roamy": "giresun, Turkey",
+      "loc2": "copenhagen, Denmark",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 12,
       "loc1": "",
-      "roamy": "",
+      "roamy": "baku, Azerbaijan",
       "loc2": "",
-      "row": 5
+      "loc1_status": "",
+      "roamy_status": "confirmed",
+      "loc2_status": ""
     },
     {
+      "row": 13,
+      "loc1": "kandi, Benin",
+      "roamy": "surat, India",
+      "loc2": "dimtu, Ethiopia",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 14,
+      "loc1": "cairns, Queensland, Australia",
+      "roamy": "mayotte, France",
+      "loc2": "maputo, Mozambique",
+      "loc1_status": "probable",
+      "roamy_status": "confirmed",
+      "loc2_status": "probable"
+    },
+    {
+      "row": 15,
+      "loc1": "algiers, Algeria",
+      "roamy": "moora, Australia",
+      "loc2": "heard island, Australia",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 16,
+      "loc1": "thane, India",
+      "roamy": "okato, New Zealand",
+      "loc2": "nazaré, Portugal",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 17,
       "loc1": "",
-      "roamy": "",
+      "roamy": "christchurch, New Zealand",
       "loc2": "",
-      "row": 6
+      "loc1_status": "",
+      "roamy_status": "confirmed",
+      "loc2_status": ""
     },
     {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 7
+      "row": 18,
+      "loc1": "moscow, Russia",
+      "roamy": "české budějovice, Czechia",
+      "loc2": "arles, France",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
     },
     {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 8
+      "row": 19,
+      "loc1": "tashkent, Uzbekistan",
+      "roamy": "antalya, Turkey",
+      "loc2": "tallinn, Estonia",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
     },
     {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 9
+      "row": 20,
+      "loc1": "divo, Côte d'Ivoire",
+      "roamy": "sokode, Togo",
+      "loc2": "doha, Qatar",
+      "loc1_status": "probable",
+      "roamy_status": "confirmed",
+      "loc2_status": "probable"
     },
     {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 10
+      "row": 21,
+      "loc1": "armavir, Armenia",
+      "roamy": "monkey bay, Malawi",
+      "loc2": "dimtu, Ethiopia",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
     },
     {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 11
+      "row": 22,
+      "loc1": "malé, Maldives",
+      "roamy": "castelo branco, Portugal",
+      "loc2": "thane, India",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
     },
     {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 12
-    },
-    {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 13
-    },
-    {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 14
-    },
-    {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 15
-    },
-    {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 16
-    },
-    {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 17
-    },
-    {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 18
-    },
-    {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 19
-    },
-    {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 20
-    },
-    {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 21
-    },
-    {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 22
-    },
-    {
+      "row": 23,
       "loc1": "accra, Ghana",
       "roamy": "nova russas, Brazil",
       "loc2": "lima, Peru",
-      "row": 23
+      "loc1_status": "probable",
+      "roamy_status": "confirmed",
+      "loc2_status": "probable"
     },
     {
+      "row": 24,
       "loc1": "",
-      "roamy": "",
+      "roamy": "curicó, Chile",
       "loc2": "",
-      "row": 24
+      "loc1_status": "",
+      "roamy_status": "confirmed",
+      "loc2_status": ""
     },
     {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 25
+      "row": 25,
+      "loc1": "copenhagen, Denmark",
+      "roamy": "velingrad, Bulgaria",
+      "loc2": "antananarivo, Madagascar",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
     },
     {
-      "loc1": "",
+      "row": 26,
+      "loc1": "buffalo, NY",
       "roamy": "",
-      "loc2": "",
-      "row": 26
+      "loc2": "nazaré, Portugal",
+      "loc1_status": "speculative",
+      "roamy_status": "",
+      "loc2_status": "speculative"
     },
     {
-      "loc1": "",
+      "row": 27,
+      "loc1": "lower hutt, New Zealand",
       "roamy": "",
-      "loc2": "",
-      "row": 27
+      "loc2": "arles, France",
+      "loc1_status": "speculative",
+      "roamy_status": "",
+      "loc2_status": "speculative"
     },
     {
-      "loc1": "",
+      "row": 28,
+      "loc1": "algiers, Algeria",
       "roamy": "",
-      "loc2": "",
-      "row": 28
+      "loc2": "nazaré, Portugal",
+      "loc1_status": "speculative",
+      "roamy_status": "",
+      "loc2_status": "speculative"
     },
     {
+      "row": 29,
       "loc1": "cairo, Egypt",
       "roamy": "ambanja, Madagascar",
       "loc2": "heard island, Australia",
-      "row": 29
+      "loc1_status": "probable",
+      "roamy_status": "confirmed",
+      "loc2_status": "probable"
     },
     {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 30
+      "row": 30,
+      "loc1": "nome, AK",
+      "roamy": "edmonton, Canada",
+      "loc2": "toad suck, AR",
+      "loc1_status": "probable",
+      "roamy_status": "confirmed",
+      "loc2_status": "probable"
     },
     {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 31
+      "row": 31,
+      "loc1": "maputo, Mozambique",
+      "roamy": "vladivostok, Russia",
+      "loc2": "lower hutt, New Zealand",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
     },
     {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 32
+      "row": 32,
+      "loc1": "seoul, South Korea",
+      "roamy": "tacurong, The Philippines",
+      "loc2": "kupang, Indonesia",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
     },
     {
-      "loc1": "",
+      "row": 33,
+      "loc1": "kupang, Indonesia",
       "roamy": "",
       "loc2": "",
-      "row": 33
+      "loc1_status": "speculative",
+      "roamy_status": "",
+      "loc2_status": ""
     },
     {
-      "loc1": "",
+      "row": 34,
+      "loc1": "dimtu, Ethiopia",
       "roamy": "",
-      "loc2": "",
-      "row": 34
+      "loc2": "antananarivo, Madagascar",
+      "loc1_status": "speculative",
+      "roamy_status": "",
+      "loc2_status": "speculative"
     },
     {
-      "loc1": "",
-      "roamy": "",
+      "row": 35,
+      "loc1": "arles, France",
+      "roamy": "cochabamba, Bolivia",
       "loc2": "",
-      "row": 35
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": ""
     },
     {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 36
+      "row": 36,
+      "loc1": "lower hutt, New Zealand",
+      "roamy": "saint-pierre, Saint Pierre and Miquelon",
+      "loc2": "tbilisi, Georgia",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
     },
     {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 37
+      "row": 37,
+      "loc1": "buffalo, NY",
+      "roamy": "charlotte, NC",
+      "loc2": "tampa bay, FL",
+      "loc1_status": "probable",
+      "roamy_status": "confirmed",
+      "loc2_status": "probable"
     },
     {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 38
+      "row": 38,
+      "loc1": "sucre, Bolivia",
+      "roamy": "orlando, FL",
+      "loc2": "south pole, Antarctica",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
     },
     {
-      "loc1": "",
-      "roamy": "",
-      "loc2": "",
-      "row": 39
+      "row": 39,
+      "loc1": "cairo, Egypt",
+      "roamy": "marrakesh, Morocco",
+      "loc2": "malé, Maldives",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
     },
     {
-      "loc1": "",
-      "roamy": "",
+      "row": 40,
+      "loc1": "kandi, Benin",
+      "roamy": "manaus, Brazil",
       "loc2": "",
-      "row": 40
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": ""
     }
   ]
 }

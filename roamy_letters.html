@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roamy Letters — Reorder</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, sans-serif; background: #f0f0f0; color: #222; }
+    .site-title { padding: 10px 12px; border-bottom: 1px solid #ccc; background: #fff; }
+    .site-title a { color: #333; text-decoration: none; font-weight: bold; }
+    .site-title a:hover { text-decoration: underline; }
+    .letter-bar { padding: 12px 16px; margin: 12px; background: #1a1a2e; color: #ffcc00; font-family: ui-monospace, monospace; font-size: 22px; letter-spacing: 3px; font-weight: 700; border-radius: 8px; min-height: 52px; }
+    .letter-bar .slot { display: inline-block; width: 1.2em; text-align: center; }
+    .letter-bar .slot.empty { color: #444; }
+    .container { max-width: 520px; margin: 0 auto; padding: 12px; }
+    h1 { font-size: 1.1rem; margin: 0 0 8px 0; color: #333; }
+    .hint { font-size: 12px; color: #666; margin-bottom: 12px; }
+    .continent { margin-bottom: 16px; }
+    .continent-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #666; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid #ccc; }
+    .roamy-list { list-style: none; padding: 0; margin: 0; }
+    .roamy-list li { padding: 10px 12px; margin-bottom: 6px; background: #fff; border: 1px solid #ddd; border-radius: 6px; cursor: grab; display: flex; align-items: center; gap: 10px; font-size: 14px; }
+    .roamy-list li:active { cursor: grabbing; }
+    .roamy-list li.dragging { opacity: 0.6; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .roamy-list li.drag-over { border-color: #ffcc00; background: #fffde8; }
+    .roamy-list .letter { font-weight: 800; font-size: 16px; color: #b8860b; min-width: 24px; text-align: center; }
+  </style>
+</head>
+<body>
+  <p class="site-title"><a href="index.html">&larr; ROAMY STUPID</a></p>
+  <div class="letter-bar" id="letterBar"></div>
+  <div class="container">
+    <h1>Remaining letters (unconfirmed roamys only)</h1>
+    <p class="hint" id="countHint">Loading…</p>
+    <p><button type="button" id="resetOrder">Reset to default order</button></p>
+    <div id="roamyByContinent"></div>
+  </div>
+
+  <script>
+  (function() {
+    const ROAMY_FIRST_LETTER = {"casper, WY":"B","arzamas, Russia":"E","mubi, Nigeria":"F","baku, Azerbaijan":"H","moora, Australia":"H","surat, India":"I","marquette, MI":"M","beatty, NV":"N","mosul, Iraq":"O","visby, Sweden":"R","istanbul, Turkey":"R","genoa, Italy":"S","mayotte, France":"S","giresun, Turkey":"T","l'ascension, Quebec":"U","okato, New Zealand":"A","nova russas, Brazil":"D","české budějovice, Czechia":"F","christchurch, New Zealand":"L","castelo branco, Portugal":"L","sokode, Togo":"O","curicó, Chile":"S","monkey bay, Malawi":"U","antalya, Turkey":"W","ambanja, Madagascar":"A","saint-pierre, Saint Pierre and Miquelon":"A","krasnodar, Russia":"E","tucumán, Argentina":"E","derby, Western Australia":"E","manaus, Brazil":"E","pune, India":"L","hasik, Oman":"L","velingrad, Bulgaria":"M","marrakesh, Morocco":"N","orlando, FL":"O","charlotte, NC":"S","edmonton, Canada":"S","vladivostok, Russia":"S","cochabamba, Bolivia":"T","tacurong, The Philippines":"W"};
+
+    function continentFor(name) {
+      const s = (name.split(",")[1] || "").toLowerCase();
+      if (/wy|nv|mi|fl|nc|il|ak|ar|ks|la|ny\b/.test(s)) return "North America";
+      if (/canada|quebec|miquelon/.test(s)) return "North America";
+      if (/brazil|chile|bolivia|argentina|ecuador|peru|colombia|venezuela/.test(s)) return "South America";
+      if (/russia|turkey|france|italy|sweden|portugal|czechia|bulgaria|armenia|georgia|ukraine|spain|germany|uk\b/.test(s)) return "Europe";
+      if (/iraq|azerbaijan|oman|uae|qatar|india|pakistan|afghanistan|china|japan|korea|philippines|indonesia|malaysia/.test(s)) return "Asia";
+      if (/australia|zealand|fiji|papua/.test(s)) return "Oceania";
+      if (/nigeria|togo|madagascar|malawi|morocco|botswana|mozambique|ethiopia|kenya|egypt|benin|côte|ivoire/.test(s)) return "Africa";
+      return "Other";
+    }
+
+    const ROAMYS = [
+      "casper, WY","arzamas, Russia","mubi, Nigeria","baku, Azerbaijan","moora, Australia","surat, India",
+      "marquette, MI","beatty, NV","mosul, Iraq","visby, Sweden","istanbul, Turkey","genoa, Italy",
+      "mayotte, France","giresun, Turkey","l'ascension, Quebec",
+      "okato, New Zealand","nova russas, Brazil","české budějovice, Czechia","christchurch, New Zealand",
+      "castelo branco, Portugal","sokode, Togo","curicó, Chile","monkey bay, Malawi","antalya, Turkey",
+      "ambanja, Madagascar","saint-pierre, Saint Pierre and Miquelon","krasnodar, Russia","tucumán, Argentina",
+      "derby, Western Australia","manaus, Brazil","pune, India","hasik, Oman","velingrad, Bulgaria",
+      "marrakesh, Morocco","orlando, FL","charlotte, NC","edmonton, Canada","vladivostok, Russia",
+      "cochabamba, Bolivia","tacurong, The Philippines"
+    ];
+
+    const STORAGE_KEY = "roamyLettersOrder";
+    const TRIPLET_CONFIRMED_KEY = "tripletExplorerConfirmed";
+    let order = [];
+
+    function getConfirmedRoamyNames() {
+      const names = new Set();
+      try {
+        const raw = JSON.parse(localStorage.getItem(TRIPLET_CONFIRMED_KEY) || "{}");
+        for (const row of Object.keys(raw)) {
+          if (row === "0") continue;
+          const t = raw[row];
+          if (!t || !t.roamy_name) continue;
+          const canon = ROAMYS.find(r => r === t.roamy_name || r.toLowerCase() === (t.roamy_name || "").toLowerCase());
+          if (canon) names.add(canon);
+        }
+      } catch (e) {}
+      return names;
+    }
+
+    function getUnconfirmedOrder() {
+      const confirmed = getConfirmedRoamyNames();
+      return order.filter(name => !confirmed.has(name));
+    }
+
+    function loadOrder() {
+      try {
+        const s = localStorage.getItem(STORAGE_KEY);
+        if (s) {
+          const parsed = JSON.parse(s);
+          if (Array.isArray(parsed) && parsed.length === 40) order = parsed;
+        }
+      } catch (e) {}
+      if (order.length !== 40) order = ROAMYS.slice();
+    }
+
+    function saveOrder() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(order));
+    }
+
+    function getLetter(name) {
+      return ROAMY_FIRST_LETTER[name] || "?";
+    }
+
+    function updateLetterBar() {
+      const unconfirmed = getUnconfirmedOrder();
+      const el = document.getElementById("letterBar");
+      el.innerHTML = unconfirmed.map(name => {
+        const letter = getLetter(name);
+        return "<span class=\"slot\">" + letter + "</span>";
+      }).join("");
+      const hint = document.getElementById("countHint");
+      const nConf = getConfirmedRoamyNames().size;
+      hint.textContent = unconfirmed.length + " remaining (" + nConf + " confirmed in Triplet Explorer). Drag to reorder; letters above update.";
+    }
+
+    function buildByContinent() {
+      const unconfirmed = getUnconfirmedOrder();
+      const byContinent = {};
+      unconfirmed.forEach(name => {
+        const c = continentFor(name);
+        if (!byContinent[c]) byContinent[c] = [];
+        byContinent[c].push(name);
+      });
+      const orderContinent = ["North America","South America","Europe","Asia","Africa","Oceania","Other"];
+      const wrap = document.getElementById("roamyByContinent");
+      wrap.innerHTML = "";
+      orderContinent.forEach(cont => {
+        const list = byContinent[cont];
+        if (!list || list.length === 0) return;
+        const section = document.createElement("div");
+        section.className = "continent";
+        section.innerHTML = "<div class=\"continent-title\">" + cont + "</div><ul class=\"roamy-list\" data-continent=\"" + cont + "\"></ul>";
+        const ul = section.querySelector("ul");
+        list.forEach(name => {
+          const li = document.createElement("li");
+          li.draggable = true;
+          li.dataset.name = name;
+          li.innerHTML = "<span class=\"letter\">" + getLetter(name) + "</span> <span>" + name + "</span>";
+          ul.appendChild(li);
+        });
+        wrap.appendChild(section);
+      });
+      attachDragListeners();
+    }
+
+    function attachDragListeners() {
+      document.querySelectorAll(".roamy-list li").forEach(li => {
+        li.addEventListener("dragstart", onDragStart);
+        li.addEventListener("dragend", onDragEnd);
+        li.addEventListener("dragover", onDragOver);
+        li.addEventListener("drop", onDrop);
+        li.addEventListener("dragleave", onDragLeave);
+      });
+    }
+
+    let draggedLi = null;
+
+    function onDragStart(e) {
+      draggedLi = e.currentTarget;
+      e.currentTarget.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", e.currentTarget.dataset.name);
+    }
+
+    function onDragEnd(e) {
+      e.currentTarget.classList.remove("dragging");
+      document.querySelectorAll(".roamy-list li.drag-over").forEach(el => el.classList.remove("drag-over"));
+      draggedLi = null;
+    }
+
+    function onDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      const t = e.currentTarget;
+      if (t !== draggedLi && t.closest(".roamy-list")) t.classList.add("drag-over");
+    }
+
+    function onDragLeave(e) {
+      e.currentTarget.classList.remove("drag-over");
+    }
+
+    function getUnconfirmedOrderFromDom() {
+      const names = [];
+      document.querySelectorAll("#roamyByContinent .roamy-list li").forEach(li => names.push(li.dataset.name));
+      return names;
+    }
+
+    function mergeUnconfirmedIntoFullOrder(newUnconfirmedOrder) {
+      const confirmed = getConfirmedRoamyNames();
+      const merged = [];
+      let j = 0;
+      for (const name of order) {
+        if (confirmed.has(name)) merged.push(name);
+        else merged.push(newUnconfirmedOrder[j++] || name);
+      }
+      order = merged;
+    }
+
+    function onDrop(e) {
+      e.preventDefault();
+      e.currentTarget.classList.remove("drag-over");
+      const targetLi = e.currentTarget;
+      const name = e.dataTransfer.getData("text/plain");
+      if (!name || targetLi.dataset.name === name) return;
+      const unconfirmed = getUnconfirmedOrder();
+      const idx = unconfirmed.indexOf(name);
+      const targetIdx = unconfirmed.indexOf(targetLi.dataset.name);
+      if (idx === -1 || targetIdx === -1) return;
+      const newUnconfirmed = unconfirmed.slice();
+      newUnconfirmed.splice(idx, 1);
+      newUnconfirmed.splice(targetIdx, 0, name);
+      mergeUnconfirmedIntoFullOrder(newUnconfirmed);
+      saveOrder();
+      updateLetterBar();
+      buildByContinent();
+    }
+
+    document.getElementById("resetOrder").addEventListener("click", function() {
+      order = ROAMYS.slice();
+      saveOrder();
+      updateLetterBar();
+      buildByContinent();
+    });
+
+    loadOrder();
+    updateLetterBar();
+    buildByContinent();
+  })();
+  </script>
+</body>
+</html>

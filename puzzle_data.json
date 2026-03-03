@@ -1,0 +1,1368 @@
+{
+  "stage1_locations": [
+    {
+      "name": "maputo, Mozambique",
+      "lat": -25.9692,
+      "lon": 32.5732,
+      "vehicle_color": "purple-boat"
+    },
+    {
+      "name": "kandi, Benin",
+      "lat": 11.1342,
+      "lon": 2.9386,
+      "vehicle_color": "gold-boat"
+    },
+    {
+      "name": "seoul, South Korea",
+      "lat": 37.5665,
+      "lon": 126.978,
+      "vehicle_color": "green-boat"
+    },
+    {
+      "name": "cairo, Egypt",
+      "lat": 30.0444,
+      "lon": 31.2357,
+      "vehicle_color": "purple-boat"
+    },
+    {
+      "name": "lower hutt, New Zealand",
+      "lat": -41.207,
+      "lon": 174.9053,
+      "vehicle_color": "purple-boat"
+    },
+    {
+      "name": "ankara, Turkey",
+      "lat": 39.9334,
+      "lon": 32.8597,
+      "vehicle_color": "brown-boat"
+    },
+    {
+      "name": "tbilisi, Georgia",
+      "lat": 41.7151,
+      "lon": 44.8271,
+      "vehicle_color": "green-boat"
+    },
+    {
+      "name": "toad suck, AR",
+      "lat": 35.089,
+      "lon": -92.555,
+      "vehicle_color": "green-boat"
+    },
+    {
+      "name": "tijuana, Mexico",
+      "lat": 32.5149,
+      "lon": -117.0382,
+      "vehicle_color": "brown-boat"
+    },
+    {
+      "name": "armavir, Armenia",
+      "lat": 40.1545,
+      "lon": 44.0382,
+      "vehicle_color": "silver-boat"
+    },
+    {
+      "name": "doha, Qatar",
+      "lat": 25.2854,
+      "lon": 51.531,
+      "vehicle_color": "purple-boat"
+    },
+    {
+      "name": "moscow, Russia",
+      "lat": 55.7558,
+      "lon": 37.6173,
+      "vehicle_color": "green-boat"
+    },
+    {
+      "name": "accra, Ghana",
+      "lat": 5.6037,
+      "lon": -0.187,
+      "vehicle_color": "brown-boat"
+    },
+    {
+      "name": "kabul, Afghanistan",
+      "lat": 34.5553,
+      "lon": 69.2075,
+      "vehicle_color": "brown-boat"
+    },
+    {
+      "name": "arles, France",
+      "lat": 43.6766,
+      "lon": 4.6278,
+      "vehicle_color": "green-boat"
+    },
+    {
+      "name": "kupang, Indonesia",
+      "lat": -10.1833,
+      "lon": 123.5833,
+      "vehicle_color": "brown-boat"
+    },
+    {
+      "name": "lahore, Pakistan",
+      "lat": 31.5204,
+      "lon": 74.3587,
+      "vehicle_color": "green-boat"
+    },
+    {
+      "name": "lima, Peru",
+      "lat": -12.0464,
+      "lon": -77.0428,
+      "vehicle_color": "silver-boat"
+    },
+    {
+      "name": "tashkent, Uzbekistan",
+      "lat": 41.2995,
+      "lon": 69.2401,
+      "vehicle_color": "green-boat"
+    },
+    {
+      "name": "tallinn, Estonia",
+      "lat": 59.437,
+      "lon": 24.7536,
+      "vehicle_color": "purple-boat"
+    },
+    {
+      "name": "new orleans, LA",
+      "lat": 29.9511,
+      "lon": -90.0715,
+      "vehicle_color": "gold-boat"
+    },
+    {
+      "name": "yellowstone, WY",
+      "lat": 44.428,
+      "lon": -110.5885,
+      "vehicle_color": "gold-boat"
+    },
+    {
+      "name": "casablanca, Morocco",
+      "lat": 33.5731,
+      "lon": -7.5898,
+      "vehicle_color": "green-boat"
+    },
+    {
+      "name": "north york, Ontario, Canada",
+      "lat": 43.7615,
+      "lon": -79.4111,
+      "vehicle_color": "silver-boat"
+    },
+    {
+      "name": "algiers, Algeria",
+      "lat": 36.7538,
+      "lon": 3.0588,
+      "vehicle_color": "green-boat"
+    },
+    {
+      "name": "tampa bay, FL",
+      "lat": 27.9506,
+      "lon": -82.4572,
+      "vehicle_color": "silver-boat"
+    },
+    {
+      "name": "wichita, KS",
+      "lat": 37.6872,
+      "lon": -97.3301,
+      "vehicle_color": "purple-boat"
+    },
+    {
+      "name": "tierra del fuego, Argentina",
+      "lat": -54.8019,
+      "lon": -68.303,
+      "vehicle_color": "silver-boat"
+    },
+    {
+      "name": "dekalb, IL",
+      "lat": 41.9295,
+      "lon": -88.7504,
+      "vehicle_color": "brown-boat"
+    },
+    {
+      "name": "montreal, Canada",
+      "lat": 45.5017,
+      "lon": -73.5673,
+      "vehicle_color": "silver-boat"
+    },
+    {
+      "name": "cairns, Queensland, Australia",
+      "lat": -16.9186,
+      "lon": 145.7781,
+      "vehicle_color": "brown-boat"
+    },
+    {
+      "name": "divo, Côte d'Ivoire",
+      "lat": 5.8431,
+      "lon": -5.361,
+      "vehicle_color": "purple-boat"
+    },
+    {
+      "name": "copenhagen, Denmark",
+      "lat": 55.6761,
+      "lon": 12.5683,
+      "vehicle_color": "gold-boat"
+    },
+    {
+      "name": "buffalo, NY",
+      "lat": 42.8864,
+      "lon": -78.8784,
+      "vehicle_color": "brown-boat"
+    },
+    {
+      "name": "sucre, Bolivia",
+      "lat": -19.0196,
+      "lon": -65.262,
+      "vehicle_color": "green-boat"
+    },
+    {
+      "name": "quito, Ecuador",
+      "lat": -0.2202,
+      "lon": -78.5123,
+      "vehicle_color": "purple-boat"
+    },
+    {
+      "name": "south pole, Antarctica",
+      "lat": -90.0,
+      "lon": 0.0,
+      "vehicle_color": "gold-boat"
+    },
+    {
+      "name": "malé, Maldives",
+      "lat": 4.1755,
+      "lon": 73.5093,
+      "vehicle_color": "gold-boat"
+    },
+    {
+      "name": "iturup, Russia",
+      "lat": 45.25,
+      "lon": 147.8167,
+      "vehicle_color": "purple-boat"
+    },
+    {
+      "name": "yellowknife, Canada",
+      "lat": 62.454,
+      "lon": -114.3718,
+      "vehicle_color": "gold-boat"
+    },
+    {
+      "name": "thane, India",
+      "lat": 19.2183,
+      "lon": 72.9789,
+      "vehicle_color": "brown-boat"
+    },
+    {
+      "name": "nazaré, Portugal",
+      "lat": 39.6012,
+      "lon": -9.0711,
+      "vehicle_color": "purple-boat"
+    },
+    {
+      "name": "nome, AK",
+      "lat": 64.5011,
+      "lon": -165.4064,
+      "vehicle_color": "green-boat"
+    },
+    {
+      "name": "dimtu, Ethiopia",
+      "lat": 6.9,
+      "lon": 37.75,
+      "vehicle_color": "purple-boat"
+    },
+    {
+      "name": "antananarivo, Madagascar",
+      "lat": -18.8792,
+      "lon": 47.5079,
+      "vehicle_color": "purple-boat"
+    },
+    {
+      "name": "gaborone, Botswana",
+      "lat": -24.6282,
+      "lon": 25.9231,
+      "vehicle_color": "green-boat"
+    },
+    {
+      "name": "heard island, Australia",
+      "lat": -53.0817,
+      "lon": 73.5042,
+      "vehicle_color": "silver-boat"
+    },
+    {
+      "name": "ile de la possession, France",
+      "lat": -46.4167,
+      "lon": 51.75,
+      "vehicle_color": ""
+    },
+    {
+      "name": "ascension island, United Kingdom",
+      "lat": -7.9467,
+      "lon": -14.3558,
+      "vehicle_color": "gold-boat"
+    },
+    {
+      "name": "eyjafjallajokull, Iceland",
+      "lat": 63.6333,
+      "lon": -19.6167,
+      "vehicle_color": ""
+    },
+    {
+      "name": "mosul, Iraq",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "red-car"
+    },
+    {
+      "name": "charlotte, NC",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "green-plane"
+    },
+    {
+      "name": "ambanja, Madagascar",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "blue-plane"
+    },
+    {
+      "name": "arzamas, Russia",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "red-car"
+    },
+    {
+      "name": "casper, WY",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "purple-car"
+    },
+    {
+      "name": "mayotte, France",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "purple-car"
+    },
+    {
+      "name": "genoa, Italy",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "black-car"
+    },
+    {
+      "name": "nova russas, Brazil",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "green-horse"
+    },
+    {
+      "name": "giresun, Turkey",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "yellow-car"
+    },
+    {
+      "name": "San Miguel de Tucumán, Argentina",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "purple-plane"
+    },
+    {
+      "name": "Natif Waterfalls, Oman",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "black-plane"
+    },
+    {
+      "name": "baku, Azerbaijan",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "red-car"
+    },
+    {
+      "name": "pune, India",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "yellow-plane"
+    },
+    {
+      "name": "surat, India",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "red-car"
+    },
+    {
+      "name": "l'ascension, Quebec",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "blue-car"
+    },
+    {
+      "name": "antalya, Turkey",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "black-horse"
+    },
+    {
+      "name": "krasnodar, Russia",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "red-plane"
+    },
+    {
+      "name": "Eyjafjallajökull, Iceland",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "brown-boat"
+    },
+    {
+      "name": "moora, Australia",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "purple-car"
+    },
+    {
+      "name": "beatty, NV",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "black-car"
+    },
+    {
+      "name": "mubi, Nigeria",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "yellow-car"
+    },
+    {
+      "name": "Derby Wharf, Australia",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "purple-plane"
+    },
+    {
+      "name": "istanbul, Turkey",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "red-car"
+    },
+    {
+      "name": "manaus, Brazil",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "green-plane"
+    },
+    {
+      "name": "visby, Sweden",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "green-car"
+    },
+    {
+      "name": "christchurch, New Zealand",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "yellow-horse"
+    },
+    {
+      "name": "velingrad, Bulgaria",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "green-plane"
+    },
+    {
+      "name": "castelo branco, Portugal",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "purple-horse"
+    },
+    {
+      "name": "marrakesh, Morocco",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "red-plane"
+    },
+    {
+      "name": "edmonton, Canada",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "green-plane"
+    },
+    {
+      "name": "orlando, FL",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "green-plane"
+    },
+    {
+      "name": "monkey bay, Malawi",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "yellow-horse"
+    },
+    {
+      "name": "Île de la Possession, France",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "gold-boat"
+    },
+    {
+      "name": "tacurong, The Philippines",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "yellow-plane"
+    },
+    {
+      "name": "marquette, MI",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "red-car"
+    },
+    {
+      "name": "Salina Turda, Romania",
+      "lat": 46.5667,
+      "lon": 23.7833,
+      "vehicle_color": "silver-boat"
+    },
+    {
+      "name": "vladivostok, Russia",
+      "lat": 5.8431,
+      "lon": -5.361,
+      "vehicle_color": "purple-plane"
+    },
+    {
+      "name": "Nazaré Coast, Portugal",
+      "lat": 39.6012,
+      "lon": -9.0711,
+      "vehicle_color": "purple-boat"
+    },
+    {
+      "name": "saint-pierre, Saint Pierre and Miquelon",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "yellow-plane"
+    },
+    {
+      "name": "Queensland, Australia",
+      "lat": -16.9186,
+      "lon": 145.7781,
+      "vehicle_color": "brown-boat"
+    },
+    {
+      "name": "české budějovice, Czechia",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "red-horse"
+    },
+    {
+      "name": "curicó, Chile",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "red-horse"
+    },
+    {
+      "name": "cochabamba, Bolivia",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "red-plane"
+    },
+    {
+      "name": "Ōkato, New Zealand",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "yellow-horse"
+    },
+    {
+      "name": "Sokodé, Togo",
+      "lat": null,
+      "lon": null,
+      "vehicle_color": "blue-horse"
+    }
+  ],
+  "roamy_locations": [
+    {
+      "name": "casper, WY",
+      "lat": 42.8666,
+      "lon": -106.3131,
+      "mode": "car",
+      "vehicle_color": "purple-car",
+      "letter": "B"
+    },
+    {
+      "name": "arzamas, Russia",
+      "lat": 55.3833,
+      "lon": 43.8167,
+      "mode": "car",
+      "vehicle_color": "red-car",
+      "letter": "E"
+    },
+    {
+      "name": "mubi, Nigeria",
+      "lat": 10.2667,
+      "lon": 13.2667,
+      "mode": "car",
+      "vehicle_color": "yellow-car",
+      "letter": "F"
+    },
+    {
+      "name": "baku, Azerbaijan",
+      "lat": 40.4093,
+      "lon": 49.8671,
+      "mode": "car",
+      "vehicle_color": "red-car",
+      "letter": "H"
+    },
+    {
+      "name": "moora, Australia",
+      "lat": -30.6333,
+      "lon": 116.0,
+      "mode": "car",
+      "vehicle_color": "purple-car",
+      "letter": "H"
+    },
+    {
+      "name": "surat, India",
+      "lat": 21.1702,
+      "lon": 72.8311,
+      "mode": "car",
+      "vehicle_color": "red-car",
+      "letter": "I"
+    },
+    {
+      "name": "marquette, MI",
+      "lat": 46.5436,
+      "lon": -87.3954,
+      "mode": "car",
+      "vehicle_color": "red-car",
+      "letter": "M"
+    },
+    {
+      "name": "beatty, NV",
+      "lat": 36.9086,
+      "lon": -116.7592,
+      "mode": "car",
+      "vehicle_color": "black-car",
+      "letter": "N"
+    },
+    {
+      "name": "mosul, Iraq",
+      "lat": 36.34,
+      "lon": 43.13,
+      "mode": "car",
+      "vehicle_color": "red-car",
+      "letter": "O"
+    },
+    {
+      "name": "visby, Sweden",
+      "lat": 57.6348,
+      "lon": 18.2948,
+      "mode": "car",
+      "vehicle_color": "green-car",
+      "letter": "R"
+    },
+    {
+      "name": "istanbul, Turkey",
+      "lat": 41.0082,
+      "lon": 28.9784,
+      "mode": "car",
+      "vehicle_color": "red-car",
+      "letter": "R"
+    },
+    {
+      "name": "genoa, Italy",
+      "lat": 44.4056,
+      "lon": 8.9463,
+      "mode": "car",
+      "vehicle_color": "black-car",
+      "letter": "S"
+    },
+    {
+      "name": "mayotte, France",
+      "lat": -12.8275,
+      "lon": 45.1662,
+      "mode": "car",
+      "vehicle_color": "purple-car",
+      "letter": "S"
+    },
+    {
+      "name": "giresun, Turkey",
+      "lat": 40.9128,
+      "lon": 38.3895,
+      "mode": "car",
+      "vehicle_color": "yellow-car",
+      "letter": "T"
+    },
+    {
+      "name": "l'ascension, Quebec",
+      "lat": 48.6833,
+      "lon": -71.6833,
+      "mode": "car",
+      "vehicle_color": "blue-car",
+      "letter": "U"
+    },
+    {
+      "name": "okato, New Zealand",
+      "lat": -39.1833,
+      "lon": 173.8833,
+      "mode": "horse",
+      "vehicle_color": "",
+      "letter": "A"
+    },
+    {
+      "name": "nova russas, Brazil",
+      "lat": -5.5667,
+      "lon": -40.5667,
+      "mode": "horse",
+      "vehicle_color": "green-horse",
+      "letter": "D"
+    },
+    {
+      "name": "české budějovice, Czechia",
+      "lat": 48.9745,
+      "lon": 14.4747,
+      "mode": "horse",
+      "vehicle_color": "red-horse",
+      "letter": "F"
+    },
+    {
+      "name": "christchurch, New Zealand",
+      "lat": -43.5321,
+      "lon": 172.6362,
+      "mode": "horse",
+      "vehicle_color": "yellow-horse",
+      "letter": "L"
+    },
+    {
+      "name": "castelo branco, Portugal",
+      "lat": 39.8222,
+      "lon": -7.4908,
+      "mode": "horse",
+      "vehicle_color": "purple-horse",
+      "letter": "L"
+    },
+    {
+      "name": "sokode, Togo",
+      "lat": 8.9833,
+      "lon": 1.1333,
+      "mode": "horse",
+      "vehicle_color": "blue-horse",
+      "letter": "O"
+    },
+    {
+      "name": "curicó, Chile",
+      "lat": -34.9828,
+      "lon": -71.2394,
+      "mode": "horse",
+      "vehicle_color": "red-horse",
+      "letter": "S"
+    },
+    {
+      "name": "monkey bay, Malawi",
+      "lat": -14.0833,
+      "lon": 34.9167,
+      "mode": "horse",
+      "vehicle_color": "yellow-horse",
+      "letter": "U"
+    },
+    {
+      "name": "antalya, Turkey",
+      "lat": 36.8969,
+      "lon": 30.7133,
+      "mode": "horse",
+      "vehicle_color": "black-horse",
+      "letter": "W"
+    },
+    {
+      "name": "ambanja, Madagascar",
+      "lat": -13.6833,
+      "lon": 48.45,
+      "mode": "plane",
+      "vehicle_color": "blue-plane",
+      "letter": "A"
+    },
+    {
+      "name": "saint-pierre, Saint Pierre and Miquelon",
+      "lat": 46.7811,
+      "lon": -56.1764,
+      "mode": "plane",
+      "vehicle_color": "yellow-plane",
+      "letter": "A"
+    },
+    {
+      "name": "krasnodar, Russia",
+      "lat": 45.035,
+      "lon": 38.975,
+      "mode": "plane",
+      "vehicle_color": "red-plane",
+      "letter": "E"
+    },
+    {
+      "name": "tucumán, Argentina",
+      "lat": -26.8083,
+      "lon": -65.2172,
+      "mode": "plane",
+      "vehicle_color": "purple-plane",
+      "letter": "E"
+    },
+    {
+      "name": "derby, Western Australia",
+      "lat": -17.3034,
+      "lon": 123.6286,
+      "mode": "plane",
+      "vehicle_color": "purple-plane",
+      "letter": "E"
+    },
+    {
+      "name": "manaus, Brazil",
+      "lat": -3.119,
+      "lon": -60.0217,
+      "mode": "plane",
+      "vehicle_color": "green-plane",
+      "letter": "E"
+    },
+    {
+      "name": "pune, India",
+      "lat": 18.5204,
+      "lon": 73.8567,
+      "mode": "plane",
+      "vehicle_color": "yellow-plane",
+      "letter": "L"
+    },
+    {
+      "name": "hasik, Oman",
+      "lat": 17.4833,
+      "lon": 55.0333,
+      "mode": "plane",
+      "vehicle_color": "",
+      "letter": "L"
+    },
+    {
+      "name": "velingrad, Bulgaria",
+      "lat": 42.0167,
+      "lon": 23.9833,
+      "mode": "plane",
+      "vehicle_color": "green-plane",
+      "letter": "M"
+    },
+    {
+      "name": "marrakesh, Morocco",
+      "lat": 31.6295,
+      "lon": -7.9811,
+      "mode": "plane",
+      "vehicle_color": "red-plane",
+      "letter": "N"
+    },
+    {
+      "name": "orlando, FL",
+      "lat": 28.5383,
+      "lon": -81.3792,
+      "mode": "plane",
+      "vehicle_color": "green-plane",
+      "letter": "O"
+    },
+    {
+      "name": "charlotte, NC",
+      "lat": 35.2271,
+      "lon": -80.8431,
+      "mode": "plane",
+      "vehicle_color": "green-plane",
+      "letter": "S"
+    },
+    {
+      "name": "edmonton, Canada",
+      "lat": 53.5461,
+      "lon": -113.4938,
+      "mode": "plane",
+      "vehicle_color": "green-plane",
+      "letter": "S"
+    },
+    {
+      "name": "vladivostok, Russia",
+      "lat": 43.1198,
+      "lon": 131.8869,
+      "mode": "plane",
+      "vehicle_color": "purple-boat",
+      "letter": "S"
+    },
+    {
+      "name": "cochabamba, Bolivia",
+      "lat": -17.3935,
+      "lon": -66.157,
+      "mode": "plane",
+      "vehicle_color": "red-plane",
+      "letter": "T"
+    },
+    {
+      "name": "tacurong, The Philippines",
+      "lat": 6.6833,
+      "lon": 124.6833,
+      "mode": "plane",
+      "vehicle_color": "yellow-plane",
+      "letter": "W"
+    },
+    {
+      "name": "manistee, MI",
+      "lat": 44.2445,
+      "lon": -86.3242,
+      "mode": "car",
+      "vehicle_color": "",
+      "letter": ""
+    }
+  ],
+  "row_vehicle_colors": {
+    "1": [
+      "brown-boat",
+      "black-car",
+      "gold-boat"
+    ],
+    "2": [
+      "gold-boat",
+      "blue-car",
+      "silver-boat"
+    ],
+    "6": [
+      "purple-boat",
+      "green-car",
+      "gold-boat"
+    ],
+    "7": [
+      "gold-boat",
+      "black-car",
+      "gold-boat"
+    ],
+    "10": [
+      "silver-boat",
+      "red-car",
+      "green-boat"
+    ],
+    "12": [
+      "green-boat",
+      "red-car",
+      "brown-boat"
+    ],
+    "14": [
+      "brown-boat",
+      "purple-car",
+      "purple-boat"
+    ],
+    "17": [
+      "purple-boat",
+      "yellow-horse",
+      "gold-boat"
+    ],
+    "19": [
+      "green-boat",
+      "black-horse",
+      "purple-boat"
+    ],
+    "20": [
+      "purple-boat",
+      "blue-horse",
+      "purple-boat"
+    ],
+    "23": [
+      "brown-boat",
+      "green-horse",
+      "silver-boat"
+    ],
+    "24": [
+      "silver-boat",
+      "red-horse",
+      "silver-boat"
+    ],
+    "29": [
+      "purple-boat",
+      "blue-plane",
+      "silver-boat"
+    ],
+    "30": [
+      "green-boat",
+      "green-plane",
+      "green-boat"
+    ],
+    "33": [
+      "brown-boat",
+      "purple-plane",
+      "gold-boat"
+    ],
+    "35": [
+      "green-boat",
+      "red-plane",
+      "gold-boat"
+    ],
+    "37": [
+      "brown-boat",
+      "green-plane",
+      "silver-boat"
+    ],
+    "40": [
+      "gold-boat",
+      "green-plane",
+      "purple-boat"
+    ]
+  },
+  "phrase": "NUMBERSFORTHISHALFWOULDSMELLASSWEETASONE",
+  "rows": [
+    {
+      "row": 0,
+      "loc1": "dekalb, IL",
+      "roamy": "manistee, MI",
+      "loc2": "eyjafjallajokull, Iceland",
+      "loc1_status": "confirmed",
+      "roamy_status": "confirmed",
+      "loc2_status": "confirmed"
+    },
+    {
+      "row": 1,
+      "loc1": "tijuana, Mexico",
+      "roamy": "beatty, NV",
+      "loc2": "yellowknife, Canada",
+      "loc1_status": "probable",
+      "roamy_status": "confirmed",
+      "loc2_status": "probable"
+    },
+    {
+      "row": 2,
+      "loc1": "copenhagen, Denmark",
+      "roamy": "l'ascension, Quebec",
+      "loc2": "north york, Ontario, Canada",
+      "loc1_status": "probable",
+      "roamy_status": "confirmed",
+      "loc2_status": "probable"
+    },
+    {
+      "row": 3,
+      "loc1": "ankara, Turkey",
+      "roamy": "marquette, MI",
+      "loc2": "thane, India",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 4,
+      "loc1": "algiers, Algeria",
+      "roamy": "casper, WY",
+      "loc2": "tampa bay, FL",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 5,
+      "loc1": "ankara, Turkey",
+      "roamy": "arzamas, Russia",
+      "loc2": "tbilisi, Georgia",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 6,
+      "loc1": "wichita, KS",
+      "roamy": "visby, Sweden",
+      "loc2": "",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": ""
+    },
+    {
+      "row": 7,
+      "loc1": "copenhagen, Denmark",
+      "roamy": "genoa, Italy",
+      "loc2": "kandi, Benin",
+      "loc1_status": "probable",
+      "roamy_status": "confirmed",
+      "loc2_status": "probable"
+    },
+    {
+      "row": 8,
+      "loc1": "divo, Côte d'Ivoire",
+      "roamy": "mubi, Nigeria",
+      "loc2": "nazaré, Portugal",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 9,
+      "loc1": "lahore, Pakistan",
+      "roamy": "mosul, Iraq",
+      "loc2": "heard island, Australia",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 10,
+      "loc1": "",
+      "roamy": "istanbul, Turkey",
+      "loc2": "",
+      "loc1_status": "",
+      "roamy_status": "confirmed",
+      "loc2_status": ""
+    },
+    {
+      "row": 11,
+      "loc1": "tallinn, Estonia",
+      "roamy": "giresun, Turkey",
+      "loc2": "copenhagen, Denmark",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 12,
+      "loc1": "",
+      "roamy": "baku, Azerbaijan",
+      "loc2": "",
+      "loc1_status": "",
+      "roamy_status": "confirmed",
+      "loc2_status": ""
+    },
+    {
+      "row": 13,
+      "loc1": "kandi, Benin",
+      "roamy": "surat, India",
+      "loc2": "dimtu, Ethiopia",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 14,
+      "loc1": "cairns, Queensland, Australia",
+      "roamy": "mayotte, France",
+      "loc2": "maputo, Mozambique",
+      "loc1_status": "probable",
+      "roamy_status": "confirmed",
+      "loc2_status": "probable"
+    },
+    {
+      "row": 15,
+      "loc1": "algiers, Algeria",
+      "roamy": "moora, Australia",
+      "loc2": "heard island, Australia",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 16,
+      "loc1": "thane, India",
+      "roamy": "okato, New Zealand",
+      "loc2": "nazaré, Portugal",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 17,
+      "loc1": "",
+      "roamy": "christchurch, New Zealand",
+      "loc2": "",
+      "loc1_status": "",
+      "roamy_status": "confirmed",
+      "loc2_status": ""
+    },
+    {
+      "row": 18,
+      "loc1": "moscow, Russia",
+      "roamy": "české budějovice, Czechia",
+      "loc2": "arles, France",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 19,
+      "loc1": "tashkent, Uzbekistan",
+      "roamy": "antalya, Turkey",
+      "loc2": "tallinn, Estonia",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 20,
+      "loc1": "divo, Côte d'Ivoire",
+      "roamy": "sokode, Togo",
+      "loc2": "doha, Qatar",
+      "loc1_status": "probable",
+      "roamy_status": "confirmed",
+      "loc2_status": "probable"
+    },
+    {
+      "row": 21,
+      "loc1": "armavir, Armenia",
+      "roamy": "monkey bay, Malawi",
+      "loc2": "dimtu, Ethiopia",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 22,
+      "loc1": "malé, Maldives",
+      "roamy": "castelo branco, Portugal",
+      "loc2": "thane, India",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 23,
+      "loc1": "accra, Ghana",
+      "roamy": "nova russas, Brazil",
+      "loc2": "lima, Peru",
+      "loc1_status": "probable",
+      "roamy_status": "confirmed",
+      "loc2_status": "probable"
+    },
+    {
+      "row": 24,
+      "loc1": "",
+      "roamy": "curicó, Chile",
+      "loc2": "",
+      "loc1_status": "",
+      "roamy_status": "confirmed",
+      "loc2_status": ""
+    },
+    {
+      "row": 25,
+      "loc1": "copenhagen, Denmark",
+      "roamy": "velingrad, Bulgaria",
+      "loc2": "antananarivo, Madagascar",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 26,
+      "loc1": "buffalo, NY",
+      "roamy": "",
+      "loc2": "nazaré, Portugal",
+      "loc1_status": "speculative",
+      "roamy_status": "",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 27,
+      "loc1": "lower hutt, New Zealand",
+      "roamy": "",
+      "loc2": "arles, France",
+      "loc1_status": "speculative",
+      "roamy_status": "",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 28,
+      "loc1": "algiers, Algeria",
+      "roamy": "",
+      "loc2": "nazaré, Portugal",
+      "loc1_status": "speculative",
+      "roamy_status": "",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 29,
+      "loc1": "cairo, Egypt",
+      "roamy": "ambanja, Madagascar",
+      "loc2": "heard island, Australia",
+      "loc1_status": "probable",
+      "roamy_status": "confirmed",
+      "loc2_status": "probable"
+    },
+    {
+      "row": 30,
+      "loc1": "nome, AK",
+      "roamy": "edmonton, Canada",
+      "loc2": "toad suck, AR",
+      "loc1_status": "probable",
+      "roamy_status": "confirmed",
+      "loc2_status": "probable"
+    },
+    {
+      "row": 31,
+      "loc1": "maputo, Mozambique",
+      "roamy": "vladivostok, Russia",
+      "loc2": "lower hutt, New Zealand",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 32,
+      "loc1": "seoul, South Korea",
+      "roamy": "tacurong, The Philippines",
+      "loc2": "kupang, Indonesia",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 33,
+      "loc1": "kupang, Indonesia",
+      "roamy": "",
+      "loc2": "",
+      "loc1_status": "speculative",
+      "roamy_status": "",
+      "loc2_status": ""
+    },
+    {
+      "row": 34,
+      "loc1": "dimtu, Ethiopia",
+      "roamy": "",
+      "loc2": "antananarivo, Madagascar",
+      "loc1_status": "speculative",
+      "roamy_status": "",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 35,
+      "loc1": "arles, France",
+      "roamy": "cochabamba, Bolivia",
+      "loc2": "",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": ""
+    },
+    {
+      "row": 36,
+      "loc1": "lower hutt, New Zealand",
+      "roamy": "saint-pierre, Saint Pierre and Miquelon",
+      "loc2": "tbilisi, Georgia",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 37,
+      "loc1": "buffalo, NY",
+      "roamy": "charlotte, NC",
+      "loc2": "tampa bay, FL",
+      "loc1_status": "probable",
+      "roamy_status": "confirmed",
+      "loc2_status": "probable"
+    },
+    {
+      "row": 38,
+      "loc1": "sucre, Bolivia",
+      "roamy": "orlando, FL",
+      "loc2": "south pole, Antarctica",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 39,
+      "loc1": "cairo, Egypt",
+      "roamy": "marrakesh, Morocco",
+      "loc2": "malé, Maldives",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": "speculative"
+    },
+    {
+      "row": 40,
+      "loc1": "kandi, Benin",
+      "roamy": "manaus, Brazil",
+      "loc2": "",
+      "loc1_status": "speculative",
+      "roamy_status": "confirmed",
+      "loc2_status": ""
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roamy Stupid — First Letters</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, sans-serif; background: #f5f5f5; color: #222; padding: 20px; }
+    .site-title { margin-bottom: 16px; }
+    .site-title a { color: #333; text-decoration: none; font-weight: bold; font-size: 1rem; }
+    .site-title a:hover { text-decoration: underline; }
+    h2 { font-size: 1.1rem; margin: 0 0 4px 0; }
+    .legend { font-size: 12px; color: #666; margin-bottom: 16px; }
+    .legend span { display: inline-block; padding: 2px 8px; border-radius: 3px; margin-right: 8px; font-weight: 600; }
+    .legend .c { background: #d4edda; border: 1px solid #28a745; }
+    .legend .p { background: #fff3cd; border: 1px solid #e67e22; }
+    .legend .s { background: #d6eaf8; border: 1px solid #5dade2; }
+    .legend .ex { background: #f2f3f4; border: 1px solid #999; }
+    table { border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 6px 10px; border: 1px solid #ccc; text-align: center; }
+    th { background: #eee; font-size: 12px; color: #555; }
+    td.letter { font-weight: 700; font-size: 18px; font-family: 'Courier New', monospace; width: 36px; }
+    td.row-num { font-size: 12px; color: #888; width: 30px; }
+    td.loc-name { font-size: 11px; color: #777; text-align: left; max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    td.confirmed { background: #d4edda; }
+    td.probable { background: #fff3cd; }
+    td.speculative { background: #d6eaf8; }
+    td.example { background: #f2f3f4; color: #999; }
+    .readouts { margin-top: 24px; padding: 16px; background: #fff; border: 1px solid #ddd; border-radius: 6px; }
+    .readouts h3 { margin: 0 0 8px 0; font-size: 14px; }
+    .readouts .row-read { font-family: 'Courier New', monospace; font-size: 13px; margin-bottom: 2px; color: #444; }
+    .note { font-size: 11px; color: #888; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <p class="site-title"><a href="index.html">&larr; ROAMY STUPID</a></p>
+  <h2>[TEST] First Letters Grid</h2>
+  <div class="legend">
+    <span class="c">Confirmed (unique vehicle or organizer)</span>
+    <span class="p">Probable (vehicle-constrained)</span>
+    <span class="s">Speculative (GC only)</span>
+    <span class="ex">Example (row 0, excluded from readouts)</span>
+  </div>
+  <p class="note">Row 0 is an example provided by puzzle organizers and is excluded from column readouts below.</p>
+  <table>
+    <thead>
+      <tr><th>#</th><th colspan="2">Loc1</th><th colspan="2">Roamy</th><th colspan="2">Loc2</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="row-num">0</td><td class="letter example">D</td><td class="loc-name" title="dekalb, IL">dekalb, IL</td><td class="letter example">M</td><td class="loc-name" title="manistee, MI">manistee, MI</td><td class="letter example">E</td><td class="loc-name" title="eyjafjallajokull, Iceland">eyjafjallajokull, Iceland</td></tr>
+      <tr><td class="row-num">1</td><td class="letter probable">T</td><td class="loc-name" title="tijuana, Mexico">tijuana, Mexico</td><td class="letter probable">B</td><td class="loc-name" title="beatty, NV">beatty, NV</td><td class="letter probable">Y</td><td class="loc-name" title="yellowknife, Canada">yellowknife, Canada</td></tr>
+      <tr><td class="row-num">2</td><td class="letter probable">C</td><td class="loc-name" title="copenhagen, Denmark">copenhagen, Denmark</td><td class="letter confirmed">L</td><td class="loc-name" title="l'ascension, Quebec">l'ascension, Quebec</td><td class="letter probable">N</td><td class="loc-name" title="north york, Ontario, Canada">north york, Ontario, Canada</td></tr>
+      <tr><td class="row-num">3</td><td class="letter speculative">A</td><td class="loc-name" title="ankara, Turkey">ankara, Turkey</td><td class="letter speculative">P</td><td class="loc-name" title="pune, India">pune, India</td><td class="letter speculative">T</td><td class="loc-name" title="thane, India">thane, India</td></tr>
+      <tr><td class="row-num">4</td><td class="letter speculative">A</td><td class="loc-name" title="algiers, Algeria">algiers, Algeria</td><td class="letter speculative">O</td><td class="loc-name" title="orlando, FL">orlando, FL</td><td class="letter speculative">T</td><td class="loc-name" title="tampa bay, FL">tampa bay, FL</td></tr>
+      <tr><td class="row-num">5</td><td class="letter speculative">A</td><td class="loc-name" title="ankara, Turkey">ankara, Turkey</td><td class="letter speculative">G</td><td class="loc-name" title="giresun, Turkey">giresun, Turkey</td><td class="letter speculative">T</td><td class="loc-name" title="tbilisi, Georgia">tbilisi, Georgia</td></tr>
+      <tr><td class="row-num">6</td><td class="letter speculative">W</td><td class="loc-name" title="wichita, KS">wichita, KS</td><td class="letter speculative">C</td><td class="loc-name" title="cochabamba, Bolivia">cochabamba, Bolivia</td><td class="letter speculative">S</td><td class="loc-name" title="sucre, Bolivia">sucre, Bolivia</td></tr>
+      <tr><td class="row-num">7</td><td class="letter probable">C</td><td class="loc-name" title="copenhagen, Denmark">copenhagen, Denmark</td><td class="letter probable">G</td><td class="loc-name" title="genoa, Italy">genoa, Italy</td><td class="letter probable">K</td><td class="loc-name" title="kandi, Benin">kandi, Benin</td></tr>
+      <tr><td class="row-num">8</td><td class="letter speculative">D</td><td class="loc-name" title="divo, Côte d'Ivoire">divo, Côte d'Ivoire</td><td class="letter speculative">M</td><td class="loc-name" title="marrakesh, Morocco">marrakesh, Morocco</td><td class="letter speculative">N</td><td class="loc-name" title="nazaré, Portugal">nazaré, Portugal</td></tr>
+      <tr><td class="row-num">9</td><td class="letter speculative">L</td><td class="loc-name" title="lahore, Pakistan">lahore, Pakistan</td><td class="letter speculative">C</td><td class="loc-name" title="casper, WY">casper, WY</td><td class="letter speculative">H</td><td class="loc-name" title="heard island, Australia">heard island, Australia</td></tr>
+      <tr><td class="row-num">10</td><td class="letter speculative">S</td><td class="loc-name" title="sucre, Bolivia">sucre, Bolivia</td><td class="letter speculative">M</td><td class="loc-name" title="manaus, Brazil">manaus, Brazil</td><td class="letter speculative">E</td><td class="loc-name" title="eyjafjallajokull, Iceland">eyjafjallajokull, Iceland</td></tr>
+      <tr><td class="row-num">11</td><td class="letter speculative">T</td><td class="loc-name" title="tallinn, Estonia">tallinn, Estonia</td><td class="letter speculative">V</td><td class="loc-name" title="visby, Sweden">visby, Sweden</td><td class="letter speculative">C</td><td class="loc-name" title="copenhagen, Denmark">copenhagen, Denmark</td></tr>
+      <tr><td class="row-num">12</td><td class="letter speculative">Y</td><td class="loc-name" title="yellowstone, WY">yellowstone, WY</td><td class="letter speculative">M</td><td class="loc-name" title="marquette, MI">marquette, MI</td><td class="letter speculative">M</td><td class="loc-name" title="montreal, Canada">montreal, Canada</td></tr>
+      <tr><td class="row-num">13</td><td class="letter speculative">K</td><td class="loc-name" title="kandi, Benin">kandi, Benin</td><td class="letter speculative">M</td><td class="loc-name" title="mubi, Nigeria">mubi, Nigeria</td><td class="letter speculative">D</td><td class="loc-name" title="dimtu, Ethiopia">dimtu, Ethiopia</td></tr>
+      <tr><td class="row-num">14</td><td class="letter probable">C</td><td class="loc-name" title="cairns, Queensland, Australia">cairns, Queensland, Australia</td><td class="letter probable">M</td><td class="loc-name" title="moora, Australia">moora, Australia</td><td class="letter probable">M</td><td class="loc-name" title="maputo, Mozambique">maputo, Mozambique</td></tr>
+      <tr><td class="row-num">15</td><td class="letter speculative">A</td><td class="loc-name" title="algiers, Algeria">algiers, Algeria</td><td class="letter speculative">M</td><td class="loc-name" title="monkey bay, Malawi">monkey bay, Malawi</td><td class="letter speculative">H</td><td class="loc-name" title="heard island, Australia">heard island, Australia</td></tr>
+      <tr><td class="row-num">16</td><td class="letter speculative">T</td><td class="loc-name" title="thane, India">thane, India</td><td class="letter speculative">C</td><td class="loc-name" title="castelo branco, Portugal">castelo branco, Portugal</td><td class="letter speculative">N</td><td class="loc-name" title="nazaré, Portugal">nazaré, Portugal</td></tr>
+      <tr><td class="row-num">17</td><td class="letter speculative">S</td><td class="loc-name" title="seoul, South Korea">seoul, South Korea</td><td class="letter speculative">A</td><td class="loc-name" title="antalya, Turkey">antalya, Turkey</td><td class="letter speculative">D</td><td class="loc-name" title="divo, Côte d'Ivoire">divo, Côte d'Ivoire</td></tr>
+      <tr><td class="row-num">18</td><td class="letter speculative">M</td><td class="loc-name" title="moscow, Russia">moscow, Russia</td><td class="letter speculative">Č</td><td class="loc-name" title="české budějovice, Czechia">české budějovice, Czechia</td><td class="letter speculative">A</td><td class="loc-name" title="arles, France">arles, France</td></tr>
+      <tr><td class="row-num">19</td><td class="letter speculative">T</td><td class="loc-name" title="tashkent, Uzbekistan">tashkent, Uzbekistan</td><td class="letter speculative">A</td><td class="loc-name" title="arzamas, Russia">arzamas, Russia</td><td class="letter speculative">T</td><td class="loc-name" title="tallinn, Estonia">tallinn, Estonia</td></tr>
+      <tr><td class="row-num">20</td><td class="letter probable">D</td><td class="loc-name" title="divo, Côte d'Ivoire">divo, Côte d'Ivoire</td><td class="letter confirmed">S</td><td class="loc-name" title="sokode, Togo">sokode, Togo</td><td class="letter probable">D</td><td class="loc-name" title="doha, Qatar">doha, Qatar</td></tr>
+      <tr><td class="row-num">21</td><td class="letter speculative">A</td><td class="loc-name" title="armavir, Armenia">armavir, Armenia</td><td class="letter speculative">M</td><td class="loc-name" title="mosul, Iraq">mosul, Iraq</td><td class="letter speculative">D</td><td class="loc-name" title="dimtu, Ethiopia">dimtu, Ethiopia</td></tr>
+      <tr><td class="row-num">22</td><td class="letter speculative">M</td><td class="loc-name" title="malé, Maldives">malé, Maldives</td><td class="letter speculative">S</td><td class="loc-name" title="surat, India">surat, India</td><td class="letter speculative">T</td><td class="loc-name" title="thane, India">thane, India</td></tr>
+      <tr><td class="row-num">23</td><td class="letter probable">A</td><td class="loc-name" title="accra, Ghana">accra, Ghana</td><td class="letter confirmed">N</td><td class="loc-name" title="nova russas, Brazil">nova russas, Brazil</td><td class="letter probable">L</td><td class="loc-name" title="lima, Peru">lima, Peru</td></tr>
+      <tr><td class="row-num">24</td><td class="letter speculative">S</td><td class="loc-name" title="seoul, South Korea">seoul, South Korea</td><td class="letter speculative">V</td><td class="loc-name" title="vladivostok, Russia">vladivostok, Russia</td><td class="letter speculative">N</td><td class="loc-name" title="new orleans, LA">new orleans, LA</td></tr>
+      <tr><td class="row-num">25</td><td class="letter speculative">C</td><td class="loc-name" title="copenhagen, Denmark">copenhagen, Denmark</td><td class="letter speculative">V</td><td class="loc-name" title="velingrad, Bulgaria">velingrad, Bulgaria</td><td class="letter speculative">A</td><td class="loc-name" title="antananarivo, Madagascar">antananarivo, Madagascar</td></tr>
+      <tr><td class="row-num">26</td><td class="letter speculative">B</td><td class="loc-name" title="buffalo, NY">buffalo, NY</td><td class="letter speculative">S</td><td class="loc-name" title="saint-pierre, Saint Pierre and Miquelon">saint-pierre, Saint Pierre and Miquelon</td><td class="letter speculative">N</td><td class="loc-name" title="nazaré, Portugal">nazaré, Portugal</td></tr>
+      <tr><td class="row-num">27</td><td class="letter speculative">L</td><td class="loc-name" title="lower hutt, New Zealand">lower hutt, New Zealand</td><td class="letter speculative">K</td><td class="loc-name" title="krasnodar, Russia">krasnodar, Russia</td><td class="letter speculative">A</td><td class="loc-name" title="arles, France">arles, France</td></tr>
+      <tr><td class="row-num">28</td><td class="letter speculative">A</td><td class="loc-name" title="algiers, Algeria">algiers, Algeria</td><td class="letter speculative">O</td><td class="loc-name" title="okato, New Zealand">okato, New Zealand</td><td class="letter speculative">N</td><td class="loc-name" title="nazaré, Portugal">nazaré, Portugal</td></tr>
+      <tr><td class="row-num">29</td><td class="letter probable">C</td><td class="loc-name" title="cairo, Egypt">cairo, Egypt</td><td class="letter confirmed">A</td><td class="loc-name" title="ambanja, Madagascar">ambanja, Madagascar</td><td class="letter probable">H</td><td class="loc-name" title="heard island, Australia">heard island, Australia</td></tr>
+      <tr><td class="row-num">30</td><td class="letter probable">N</td><td class="loc-name" title="nome, AK">nome, AK</td><td class="letter probable">E</td><td class="loc-name" title="edmonton, Canada">edmonton, Canada</td><td class="letter probable">T</td><td class="loc-name" title="toad suck, AR">toad suck, AR</td></tr>
+      <tr><td class="row-num">31</td><td class="letter speculative">M</td><td class="loc-name" title="maputo, Mozambique">maputo, Mozambique</td><td class="letter speculative">C</td><td class="loc-name" title="christchurch, New Zealand">christchurch, New Zealand</td><td class="letter speculative">L</td><td class="loc-name" title="lower hutt, New Zealand">lower hutt, New Zealand</td></tr>
+      <tr><td class="row-num">32</td><td class="letter speculative">S</td><td class="loc-name" title="seoul, South Korea">seoul, South Korea</td><td class="letter speculative">T</td><td class="loc-name" title="tacurong, The Philippines">tacurong, The Philippines</td><td class="letter speculative">K</td><td class="loc-name" title="kupang, Indonesia">kupang, Indonesia</td></tr>
+      <tr><td class="row-num">33</td><td class="letter speculative">K</td><td class="loc-name" title="kupang, Indonesia">kupang, Indonesia</td><td class="letter speculative">C</td><td class="loc-name" title="curicó, Chile">curicó, Chile</td><td class="letter speculative">S</td><td class="loc-name" title="sucre, Bolivia">sucre, Bolivia</td></tr>
+      <tr><td class="row-num">34</td><td class="letter speculative">D</td><td class="loc-name" title="dimtu, Ethiopia">dimtu, Ethiopia</td><td class="letter speculative">M</td><td class="loc-name" title="mayotte, France">mayotte, France</td><td class="letter speculative">A</td><td class="loc-name" title="antananarivo, Madagascar">antananarivo, Madagascar</td></tr>
+      <tr><td class="row-num">35</td><td class="letter speculative">A</td><td class="loc-name" title="arles, France">arles, France</td><td class="letter speculative">I</td><td class="loc-name" title="istanbul, Turkey">istanbul, Turkey</td><td class="letter speculative">T</td><td class="loc-name" title="thane, India">thane, India</td></tr>
+      <tr><td class="row-num">36</td><td class="letter speculative">L</td><td class="loc-name" title="lower hutt, New Zealand">lower hutt, New Zealand</td><td class="letter speculative">B</td><td class="loc-name" title="baku, Azerbaijan">baku, Azerbaijan</td><td class="letter speculative">T</td><td class="loc-name" title="tbilisi, Georgia">tbilisi, Georgia</td></tr>
+      <tr><td class="row-num">37</td><td class="letter probable">B</td><td class="loc-name" title="buffalo, NY">buffalo, NY</td><td class="letter probable">C</td><td class="loc-name" title="charlotte, NC">charlotte, NC</td><td class="letter probable">T</td><td class="loc-name" title="tampa bay, FL">tampa bay, FL</td></tr>
+      <tr><td class="row-num">38</td><td class="letter speculative">S</td><td class="loc-name" title="sucre, Bolivia">sucre, Bolivia</td><td class="letter speculative">T</td><td class="loc-name" title="tucumán, Argentina">tucumán, Argentina</td><td class="letter speculative">S</td><td class="loc-name" title="south pole, Antarctica">south pole, Antarctica</td></tr>
+      <tr><td class="row-num">39</td><td class="letter speculative">C</td><td class="loc-name" title="cairo, Egypt">cairo, Egypt</td><td class="letter speculative">H</td><td class="loc-name" title="hasik, Oman">hasik, Oman</td><td class="letter speculative">M</td><td class="loc-name" title="malé, Maldives">malé, Maldives</td></tr>
+      <tr><td class="row-num">40</td><td class="letter speculative">K</td><td class="loc-name" title="kandi, Benin">kandi, Benin</td><td class="letter speculative">D</td><td class="loc-name" title="derby, Western Australia">derby, Western Australia</td><td class="letter speculative">C</td><td class="loc-name" title="cairns, Queensland, Australia">cairns, Queensland, Australia</td></tr>
+    </tbody>
+  </table>
+
+  <div class="readouts">
+    <h3>Column readouts (rows 1-40 only, excluding example row 0)</h3>
+    <div class="row-read"><strong>Loc1 (40 chars):</strong> TCAAAWCDLSTYKCATSMTDAMASCBLACNMSKDALBSCK</div>
+    <div class="row-read"><strong>Roamy (40 chars):</strong> BLPOGCGMCMVMMMMCAČASMSNVVSKOAECTCMIBCTHD</div>
+    <div class="row-read"><strong>Loc2 (40 chars):</strong> YNTTTSKNHECMDMHNDATDDTLNANANHTLKSATTTSMC</div>
+    <div class="row-read"><strong>Interleaved (120 chars):</strong> TBYCLNAPTAOTAGTWCSCGKDMNLCHSMETVCYMMKMDCMMAMHTCNSADMČATATDSDAMDMSTANLSVNCVABSNLKAAONCAHNETMCLSTKKCSDMAAITLBTBCTSTSCHMKDC</div>
+  </div>
+</body>
+</html>

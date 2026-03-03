@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Golden Vault Dial</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #050812;
+      --fg: #f5f5f5;
+      --accent: #ffc857;
+      --accent-soft: rgba(255, 200, 87, 0.3);
+      --muted: #9aa0b5;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #151b2f 0, var(--bg) 55%);
+      color: var(--fg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    h2 {
+      margin: 0 0 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .dial-container {
+      position: relative;
+      width: 1440px;
+      height: 1440px;
+      margin: 10px 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dial {
+      position: relative;
+      width: 1400px;
+      height: 1400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #101524 40%, #070a12 100%);
+      box-shadow:
+        0 0 0 2px rgba(255, 255, 255, 0.04),
+        0 0 35px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(0, 0, 0, 0.8) inset;
+    }
+
+    .dial::before {
+      content: "";
+      position: absolute;
+      inset: 25%;
+      border-radius: 50%;
+      background: radial-gradient(circle, #050812 0, #050812 60%, #0c1222 100%);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.03),
+        0 0 18px rgba(0, 0, 0, 0.9) inset;
+    }
+
+    .center-cap {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #151d34 0, #080c16 70%);
+      box-shadow:
+        0 0 0 2px rgba(255, 255, 255, 0.06),
+        0 10px 30px rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 3;
+    }
+
+    .center-cap .label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .center-cap .code {
+      margin-top: 4px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+    }
+
+    .slot {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      /* transform with rotation set inline for radial alignment */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      line-height: 1.15;
+      color: var(--fg);
+      pointer-events: auto;
+    }
+
+    .slot.tick {
+      border-radius: 4px;
+      background: rgba(12, 16, 28, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+      transition: background 0.12s ease-out, transform 0.12s ease-out, box-shadow 0.12s ease-out, z-index 0s;
+    }
+
+    .slot.tick:hover {
+      background: rgba(24, 32, 56, 0.98);
+      transform: translate(-50%, -50%) rotate(var(--slot-angle, 0deg)) scale(1.4);
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--accent-soft);
+      color: var(--fg);
+      z-index: 10;
+    }
+
+    .slot.star {
+      width: 36px;
+      height: 36px;
+      font-size: 1.4rem;
+      color: var(--accent);
+      text-shadow: 0 0 14px rgba(255, 200, 87, 0.9);
+      background: none;
+      border: none;
+    }
+
+    .slot.gap {
+      width: 14px;
+      height: 14px;
+      opacity: 0.35;
+      font-size: 0.5rem;
+      color: var(--muted);
+    }
+
+    /* number outer (first), letter inner (second) — both point toward center */
+    .slot .num {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 0;
+      order: 1;
+    }
+
+    .slot .letter {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--fg);
+      order: 2;
+    }
+
+    .info {
+      max-width: 640px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.5;
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.08), transparent 70%);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .info code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.8rem;
+      padding: 0 3px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.4);
+      color: #f8f8f2;
+    }
+
+    .summary {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    .summary span {
+      white-space: nowrap;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+    .back-link:hover {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../index.html">← Back to Roamy Stupid</a>
+  <h2>Golden Vault Dial</h2>
+  <div class="subtitle">134 numbered positions around the lock, each with a letter; star at 9&nbsp;o&rsquo;clock.</div>
+
+  <div class="dial-container">
+    <div id="dial" class="dial">
+      <div class="center-cap">
+        <div class="label">Vault</div>
+        <div class="code">R62&nbsp;&middot;&nbsp;L39&nbsp;&middot;&nbsp;R05</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary" id="summary"></div>
+
+  <div class="info">
+    Each tick on the rim is one of the 134 numbers from <code>dial.txt</code>, paired with its letter from the matching word.
+    The star at 9&nbsp;o&rsquo;clock has three empty slots above and below it; the remaining slots are filled clockwise
+    with the 134 (number, letter) pairs in order.
+  </div>
+
+  <script>
+    // Flattened from golden_vault/dial.txt
+    const DIAL_NUMBERS = [
+      4,1,8,4,1,3,1,8,4,1,1,3,4,4,1,2,1,1,4,2,3,1,4,10,1,1,2,4,1,1,1,3,1,3,1,1,1,8,4,3,
+      1,1,1,1,10,4,4,1,1,5,1,4,1,8,10,1,1,1,1,1,1,3,1,1,4,1,1,8,4,1,8,1,1,1,4,1,1,1,2,
+      1,1,1,3,1,8,1,5,4,1,3,1,1,3,1,1,3,1,4,3,4,1,3,1,3,3,1,1,1,3,4,4,1,3,3,1,8,5,1,1,
+      0,1,1,1,1,1,1,1,4,1,1,2,2,1,1,3
+    ];
+
+    const DIAL_LETTERS = [
+      'H','E','X','Y','L','B','O','X','F','U','L','C','H','Y','N','D','L','E','W','D',
+      'M','A','H','Z','O','R','D','Y','S','T','O','P','I','C','A','T','A','X','Y','B',
+      'L','I','N','T','Z','W','H','I','S','K','E','Y','E','X','Q','U','I','S','I','T',
+      'E','C','O','N','F','L','U','X','H','E','X','A','S','T','Y','L','E','S','G','E',
+      'A','R','B','O','X','S','K','Y','S','C','R','A','P','E','S','P','S','Y','C','H',
+      'O','B','A','B','B','L','E','S','C','H','W','A','M','P','O','X','K','A','Z','I',
+      'L','L','I','O','N','S','H','A','N','D','G','R','I','P'
+    ];
+
+    const TOTAL_SEGMENTS = DIAL_NUMBERS.length; // 134
+    const GAP_EACH_SIDE = 3;
+    const STAR_INDEX = 0;
+    const TOTAL_SLOTS = TOTAL_SEGMENTS + 1 + GAP_EACH_SIDE * 2; // 141
+    // Tick #103 (1-based) lives at slot index 4 + (103 - 1) = 106. Anchor at 6 o'clock (90°).
+    const TICK_103_AT_6OCLOCK = 103;
+    const SLOT_INDEX_OF_TICK_103 = 4 + (TICK_103_AT_6OCLOCK - 1); // 106
+    const SIX_OCLOCK_DEG = 90;
+    const DEG_PER_SLOT = 360 / TOTAL_SLOTS;
+
+    function buildSlots() {
+      const slots = new Array(TOTAL_SLOTS).fill(null);
+
+      // Place star
+      slots[STAR_INDEX] = { type: 'star' };
+
+      // Gaps above/below the star
+      for (let k = 1; k <= GAP_EACH_SIDE; k++) {
+        slots[(STAR_INDEX - k + TOTAL_SLOTS) % TOTAL_SLOTS] = { type: 'gap' };
+        slots[(STAR_INDEX + k) % TOTAL_SLOTS] = { type: 'gap' };
+      }
+
+      // Fill remaining slots with (number, letter) pairs in order
+      let idx = 0;
+      for (let i = 0; i < TOTAL_SLOTS; i++) {
+        if (slots[i]) continue;
+        if (idx >= TOTAL_SEGMENTS) break;
+        slots[i] = {
+          type: 'tick',
+          num: DIAL_NUMBERS[idx],
+          letter: DIAL_LETTERS[idx],
+          index: idx + 1
+        };
+        idx++;
+      }
+
+      if (idx !== TOTAL_SEGMENTS) {
+        console.warn('Did not place all dial segments:', idx, '/', TOTAL_SEGMENTS);
+      }
+
+      return slots;
+    }
+
+    function renderDial() {
+      const dial = document.getElementById('dial');
+      const slots = buildSlots();
+
+      const w = dial.offsetWidth || 1400;
+      const h = dial.offsetHeight || 1400;
+      const cx = w / 2;
+      const cy = h / 2;
+      const radius = Math.min(w, h) * 0.44;
+
+      // Exact math: slot containing tick #103 at 6 o'clock (90°), all others uniformly spaced
+      // angle(pos) = 90° + 360° * (pos - 106) / 141
+      slots.forEach((slot, pos) => {
+        const angleDeg = SIX_OCLOCK_DEG + 360 * (pos - SLOT_INDEX_OF_TICK_103) / TOTAL_SLOTS;
+        const angleRad = (angleDeg * Math.PI) / 180;
+        const x = cx + radius * Math.cos(angleRad);
+        const y = cy + radius * Math.sin(angleRad);
+
+        const el = document.createElement('div');
+        el.className = 'slot ' + slot.type;
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        /* Align slot along radius: number outer, letter inner. CSS 0° = right; slot "up" is 270°; we want "up" = angleDeg (outward). */
+        const radialDeg = angleDeg + 90;
+        el.style.setProperty('--slot-angle', radialDeg + 'deg');
+        el.style.transform = `translate(-50%, -50%) rotate(${radialDeg}deg)`;
+
+        if (slot.type === 'tick') {
+          const num = slot.num !== undefined ? slot.num : '';
+          const letter = slot.letter !== undefined && slot.letter !== null ? slot.letter : '';
+          el.innerHTML = `<div class="num">${num}</div><div class="letter">${letter}</div>`;
+          el.title = slot.index != null ? `#${slot.index}: ${num} → ${letter}` : `${num} → ${letter}`;
+        } else if (slot.type === 'star') {
+          el.textContent = '★';
+          el.title = 'Dial origin (9 o\'clock)';
+        } else if (slot.type === 'gap') {
+          el.textContent = '·';
+          el.title = 'Empty gap';
+        }
+
+        dial.appendChild(el);
+      });
+
+      const summary = document.getElementById('summary');
+      const lettersJoined = DIAL_LETTERS.join('');
+      summary.innerHTML =
+        `<span><strong>Segments:</strong> ${TOTAL_SEGMENTS} numbers + star</span>` +
+        `<span><strong>Letter ring:</strong> ${lettersJoined}</span>`;
+    }
+
+    window.addEventListener('load', renderDial);
+  </script>
+</body>
+</html>
+

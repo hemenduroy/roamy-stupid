@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trips by Car — Words grouped by continent</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Georgia', serif; background: #1a1a1a; color: #e0e0e0; padding: 1rem; margin: 0; }
+    .site-title { margin-bottom: 1rem; }
+    .site-title a { color: #f0c050; text-decoration: none; font-weight: bold; }
+    .site-title a:hover { text-decoration: underline; }
+    h1 { font-size: 1.2rem; color: #fff; margin-bottom: 0.5rem; }
+    .intro { font-size: 0.9rem; color: #888; margin-bottom: 1.5rem; }
+    section { margin-bottom: 2rem; }
+    section h2 { font-size: 1rem; color: #f0c050; margin-bottom: 0.5rem; border-bottom: 1px solid #444; padding-bottom: 4px; }
+    .grid-box { background: #252525; border: 1px solid #444; border-radius: 6px; padding: 10px 14px; display: inline-block; margin: 4px 0; }
+    .grid-box pre { margin: 0; font-family: 'Courier New', monospace; font-size: 13px; color: #f0c050; letter-spacing: 0.05em; }
+    table.info { border-collapse: collapse; font-size: 13px; margin-bottom: 10px; }
+    table.info th { text-align: left; color: #888; border-bottom: 1px solid #444; padding: 4px 10px; font-weight: normal; }
+    table.info td { padding: 4px 10px; border-bottom: 1px solid #2a2a2a; font-family: 'Courier New', monospace; }
+    .city { color: #7dd3fc; }
+    .phrase { color: #aaa; font-family: 'Georgia', serif; }
+    .extract { background: #333; border: 1px solid #555; border-radius: 4px; padding: 8px 12px; margin-top: 8px; font-family: 'Courier New', monospace; font-size: 14px; color: #f0c050; letter-spacing: 0.1em; }
+    .muted { color: #666; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <p class="site-title"><a href="index.html">&larr; ROAMY STUPID</a></p>
+  <h1>Trips by Car — 12-letter words grouped by continent</h1>
+  <p class="intro">15 words sorted into continent groups based on their decoded destination city. Multiple reads and extractions shown per group.</p>
+  <div id="output"></div>
+
+  <script>
+    const data = [
+      { n:1,  word:"BARODYNAMICS", phrase:"Join us at",   city:"Casper, Wyoming",    continent:"North America" },
+      { n:2,  word:"EBULLIOSCOPE", phrase:"See lovely",   city:"Arzamas, Russia",     continent:"Europe" },
+      { n:3,  word:"FURFURACEOUS", phrase:"Meet us at",   city:"Mubi, Nigeria",       continent:"Africa" },
+      { n:4,  word:"HAPAXANTHOUS", phrase:"You'll like",  city:"Baku, Azerbaijan",    continent:"Asia" },
+      { n:5,  word:"HEKISTOTHERM", phrase:"Get down to",  city:"Moora, Australia",    continent:"Oceania" },
+      { n:6,  word:"INCLINOMETER", phrase:"Come to",      city:"Surat, India",        continent:"Asia" },
+      { n:7,  word:"MARIMBAPHONE", phrase:"Head off to",  city:"Marquette, Michigan", continent:"North America" },
+      { n:8,  word:"NEBULOPHOBIA", phrase:"Return to",    city:"Beatty, Nevada",      continent:"North America" },
+      { n:9,  word:"OCHROLEUCOUS", phrase:"Drop in on",   city:"Mosul, Iraq",         continent:"Asia" },
+      { n:10, word:"RECEPTACULAR", phrase:"Stay at",      city:"Visby, Sweden",       continent:"Europe" },
+      { n:11, word:"RISORGIMENTO", phrase:"Take in",      city:"Istanbul, Turkey",    continent:"Europe" },
+      { n:12, word:"SALAMANDROID", phrase:"Stop off at",  city:"Genoa, Italy",        continent:"Europe" },
+      { n:13, word:"SCAPULOMANCY", phrase:"Relax at",     city:"Mayotte, France",     continent:"Africa" },
+      { n:14, word:"THEANTHROPIC", phrase:"Encounter",    city:"Giresun, Turkey",     continent:"Asia" },
+      { n:15, word:"ULTRAMONTANE", phrase:"Hop over to",  city:"L'Ascension, Quebec", continent:"North America" }
+    ];
+
+    const continentOrder = ["North America", "Europe", "Asia", "Africa", "Oceania"];
+    const groups = {};
+    continentOrder.forEach(c => groups[c] = []);
+    data.forEach(d => groups[d.continent].push(d));
+
+    function pos(c) { return c.charCodeAt(0) - 65 + 1; }
+    function rot(c, n) { return String.fromCharCode(((c.charCodeAt(0) - 65 + n) % 26 + 26) % 26 + 65); }
+
+    const out = document.getElementById('output');
+
+    function addHTML(html) {
+      const div = document.createElement('div');
+      div.innerHTML = html;
+      out.appendChild(div);
+    }
+
+    continentOrder.forEach(cont => {
+      const items = groups[cont];
+      if (!items.length) return;
+
+      let html = '<section><h2>' + cont + ' (' + items.length + ' words)</h2>';
+      html += '<table class="info"><tr><th>#</th><th>Phrase</th><th>Word</th><th>City</th></tr>';
+      items.forEach(d => {
+        html += '<tr><td>' + d.n + '</td><td class="phrase">' + d.phrase + '</td><td>' + d.word + '</td><td class="city">' + d.city + '</td></tr>';
+      });
+      html += '</table>';
+
+      const words = items.map(d => d.word);
+      const letters = words.map(w => w.split(''));
+
+      // Grid
+      html += '<div class="grid-box"><pre>' + words.join('\n') + '</pre></div><br>';
+
+      // First letters
+      const firsts = letters.map(l => l[0]).join('');
+      html += '<div class="extract">First letters: ' + firsts + '</div>';
+
+      // Last letters
+      const lasts = letters.map(l => l[11]).join('');
+      html += '<div class="extract">Last letters: ' + lasts + '</div>';
+
+      // First + last
+      const fl = letters.map(l => l[0] + l[11]).join(' ');
+      html += '<div class="extract">First+Last: ' + fl + '</div>';
+
+      // Columns (if >1 word)
+      if (words.length > 1) {
+        let cols = '';
+        for (let c = 0; c < 12; c++) {
+          cols += 'Col ' + (c+1).toString().padStart(2) + ': ' + letters.map(l => l[c]).join('') + '\n';
+        }
+        html += '<div class="grid-box"><pre>' + cols.trim() + '</pre></div><br>';
+      }
+
+      // Diagonals (if enough words)
+      if (words.length > 1) {
+        let diag = '', antidiag = '';
+        for (let i = 0; i < Math.min(words.length, 12); i++) {
+          diag += letters[i][i] || '';
+          antidiag += letters[i][11 - i] || '';
+        }
+        html += '<div class="extract">Main diagonal: ' + diag + '</div>';
+        html += '<div class="extract">Anti-diagonal: ' + antidiag + '</div>';
+      }
+
+      // Word sums
+      const sums = letters.map(l => l.reduce((a, c) => a + pos(c), 0));
+      html += '<div class="extract">Word sums: ' + items.map((d, i) => d.word + '=' + sums[i]).join(', ') + '</div>';
+      html += '<div class="extract">Sum total: ' + sums.reduce((a, b) => a + b, 0) + '  |  Sum mod 26: ' + String.fromCharCode(65 + (sums.reduce((a, b) => a + b, 0) % 26)) + '</div>';
+
+      // Row sum mod 26 as letters
+      const sumLetters = sums.map(s => String.fromCharCode(65 + (s % 26))).join('');
+      html += '<div class="extract">Row sums mod 26: ' + sumLetters + '</div>';
+
+      // Middle letters (pos 6 and 7, 0-based 5 and 6)
+      const mid1 = letters.map(l => l[5]).join('');
+      const mid2 = letters.map(l => l[6]).join('');
+      html += '<div class="extract">Middle letters (6th): ' + mid1 + '  |  (7th): ' + mid2 + '</div>';
+
+      // City first letters
+      const cityFirsts = items.map(d => d.city[0].toUpperCase()).join('');
+      html += '<div class="extract">City first letters: ' + cityFirsts + '</div>';
+
+      // Phrase word count → index
+      const pwcExtract = items.map(d => {
+        const wc = d.phrase.split(/\s+/).length;
+        const idx = wc;
+        return d.word[idx - 1] || '?';
+      }).join('');
+      html += '<div class="extract">Phrase word-count index: ' + pwcExtract + '</div>';
+
+      // City name letter count (first word only) → index mod 12
+      const cityExtract = items.map(d => {
+        const firstWord = d.city.split(/[,\s]/)[0].replace(/'/g, '');
+        const len = firstWord.length;
+        const idx = (len % 12) || 12;
+        return d.word[idx - 1] || '?';
+      }).join('');
+      html += '<div class="extract">City name length index (mod 12): ' + cityExtract + '</div>';
+
+      // Continent name length → index mod 12
+      {
+        const contLen = cont.replace(/\s/g, '').length;
+        const idx = (contLen % 12) || 12;
+        const contExtract = letters.map(l => l[idx - 1]).join('');
+        html += '<div class="extract">Continent name length (' + contLen + ') mod 12 = pos ' + idx + ': ' + contExtract + '</div>';
+      }
+
+      // ROT13
+      const rot13 = words.map(w => w.split('').map(c => rot(c, 13)).join('')).join('\n');
+      html += '<div class="grid-box"><pre>ROT13:\n' + rot13 + '</pre></div><br>';
+
+      // Alphabetically sorted within group
+      const sorted = words.slice().sort();
+      html += '<div class="grid-box"><pre>Alpha-sorted:\n' + sorted.join('\n') + '</pre></div><br>';
+
+      // Anagram letters (all letters in group pooled, sorted)
+      const allLetters = words.join('').split('').sort().join('');
+      html += '<div class="extract">All letters pooled (' + allLetters.length + '): ' + allLetters + '</div>';
+
+      html += '</section>';
+      addHTML(html);
+    });
+
+    // Summary section
+    let summary = '<section><h2>Cross-continent summary</h2>';
+    summary += '<table class="info"><tr><th>Continent</th><th>Count</th><th>First letters</th><th>Last letters</th><th>City firsts</th><th>Sum mod 26</th></tr>';
+    continentOrder.forEach(cont => {
+      const items = groups[cont];
+      if (!items.length) return;
+      const firsts = items.map(d => d.word[0]).join('');
+      const lasts = items.map(d => d.word[11]).join('');
+      const cityFirsts = items.map(d => d.city[0].toUpperCase()).join('');
+      const totalSum = items.reduce((a, d) => a + d.word.split('').reduce((s, c) => s + pos(c), 0), 0);
+      const sumLetter = String.fromCharCode(65 + (totalSum % 26));
+      summary += '<tr><td>' + cont + '</td><td>' + items.length + '</td><td>' + firsts + '</td><td>' + lasts + '</td><td>' + cityFirsts + '</td><td>' + sumLetter + ' (' + totalSum + ')</td></tr>';
+    });
+    summary += '</table>';
+
+    // Read first letters per continent as a string
+    const allFirstsByCont = continentOrder.map(c => groups[c].map(d => d.word[0]).join('')).join(' ');
+    summary += '<div class="extract">First letters by continent: ' + allFirstsByCont + '</div>';
+    const allLastsByCont = continentOrder.map(c => groups[c].map(d => d.word[11]).join('')).join(' ');
+    summary += '<div class="extract">Last letters by continent: ' + allLastsByCont + '</div>';
+    const allCityFirstsByCont = continentOrder.map(c => groups[c].map(d => d.city[0].toUpperCase()).join('')).join(' ');
+    summary += '<div class="extract">City first letters by continent: ' + allCityFirstsByCont + '</div>';
+
+    summary += '</section>';
+    addHTML(summary);
+  </script>
+</body>
+</html>
