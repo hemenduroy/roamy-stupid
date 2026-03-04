@@ -420,10 +420,17 @@
     <div class="vault-ops-toggle">
       <input type="checkbox" id="ignoreSpaces" />
       <label for="ignoreSpaces">Ignore spaces</label>
+      <input type="checkbox" id="ignoreStar" />
+      <label for="ignoreStar">Ignore star</label>
     </div>
     <div class="vault-ops-row marker-row">
       <label for="markerTick">Position at 9&nbsp;o&rsquo;clock when reset:</label>
-      <input type="number" id="markerTick" min="0" max="140" value="0" title="0 = star, 1-3 & 138-140 = spaces, 4-137 = tick #1-#134" />
+      <input
+        type="number"
+        id="markerTick"
+        value="0"
+        title="Any integer; normalized mod 141. 0 = star, 1-3 & 138-140 = spaces, 4-137 = tick #1-#134"
+      />
       <span class="marker-hint" id="markerHint">(star)</span>
     </div>
     <div class="vault-ops-row">
@@ -519,13 +526,48 @@
       return document.getElementById('ignoreSpaces')?.checked ?? false;
     }
 
-    // 0 = star (slot 0). 1-3 & 138-140 = spaces. 4-137 = tick #1-#134. Marker = slot index.
+    function getIgnoreStar() {
+      return document.getElementById('ignoreStar')?.checked ?? false;
+    }
+
+    // Marker is interpreted differently depending on whether spaces are ignored.
+    // - Ignore spaces OFF: raw slot index modulo TOTAL_SLOTS (0–140)
+    // - Ignore spaces ON: index in the compressed, no-gap space, centered at the star.
+    //   Negative values move clockwise from the star; -1 = first counted position after the star.
     function getMarkerSlotAtRest() {
       const el = document.getElementById('markerTick');
       if (!el) return 0;
       const v = parseInt(el.value, 10);
-      if (Number.isNaN(v) || v < 0) return 0;
-      return Math.min(v, TOTAL_SLOTS - 1);
+      if (Number.isNaN(v)) return 0;
+      // Raw slot-space behavior when not ignoring spaces.
+      if (!getIgnoreSpaces()) {
+        const normalized = ((v % TOTAL_SLOTS) + TOTAL_SLOTS) % TOTAL_SLOTS;
+        return normalized;
+      }
+
+      // Compressed space when ignoring spaces: build the list of counted positions.
+      const ignoreStar = getIgnoreStar();
+      const countedSlots = [];
+      for (let i = 0; i < TOTAL_SLOTS; i++) {
+        const slot = SLOTS_DATA[i];
+        if (!slot) continue;
+        if (slot.type === 'gap') continue;
+        if (slot.type === 'star' && ignoreStar) continue;
+        countedSlots.push(i);
+      }
+      if (countedSlots.length === 0) return 0;
+
+      // Use the star as the origin when present; otherwise fall back to index 0 in countedSlots.
+      let originIdx = countedSlots.indexOf(STAR_INDEX);
+      if (originIdx === -1) originIdx = 0;
+
+      const n = countedSlots.length;
+      // Map marker value v to an index in countedSlots such that:
+      //   v = 0  -> origin (star or first counted slot)
+      //   v = -1 -> first counted slot clockwise from origin
+      //   v = +1 -> first counted slot counter-clockwise from origin
+      const idx = ((originIdx - (v % n)) + n) % n;
+      return countedSlots[idx];
     }
 
     // Slot at 9 o'clock = markerSlotAtRest when rotation is 0; then shifts by -rotationStepsSlots per step.
@@ -590,20 +632,28 @@
       }
       const hits = [];
 
-      function advanceOneTick(dir) {
+      // When ignoring spaces, we advance only on counted positions:
+      // - All tick slots always count
+      // - The star counts only if "Ignore star" is OFF
+      // - Gaps never count in this mode
+      function advanceOneCountedStep(dir) {
         const delta = dir === 'R' ? 1 : -1;
         let guard = 0;
         while (guard < TOTAL_SLOTS + 2) {
           rotationStepsSlots += delta;
           const slot = SLOTS_DATA[slotIndexAtPointer()];
-          if (slot && slot.type === 'tick') return;
+          if (!slot) return;
+          if (slot.type === 'tick') return;
+          if (slot.type === 'star' && !getIgnoreStar()) return;
           guard++;
         }
       }
 
       function applyOneOp(dir, n) {
         if (getIgnoreSpaces()) {
-          for (let i = 0; i < n; i++) advanceOneTick(dir);
+          for (let i = 0; i < n; i++) {
+            advanceOneCountedStep(dir);
+          }
         } else {
           rotationStepsSlots += (dir === 'R' ? n : -n);
         }
@@ -699,13 +749,16 @@
       renderHitsLog([]);
 
       document.getElementById('markerTick')?.addEventListener('change', () => {
+        // Changing the marker is treated as choosing a new reset alignment.
+        rotationStepsSlots = 0;
         updateDialRotation();
         updateResultDisplay();
         updateMarkerHint();
       });
       document.getElementById('markerTick')?.addEventListener('input', () => {
         const el = document.getElementById('markerTick');
-        if (el && el.value !== '' && (Number(el.value) < 0 || Number(el.value) > 140)) return;
+        if (el && el.value !== '' && Number.isNaN(Number(el.value))) return;
+        rotationStepsSlots = 0;
         updateDialRotation();
         updateResultDisplay();
         updateMarkerHint();
@@ -728,7 +781,16 @@
         renderHitsLog([]);
       });
       document.getElementById('ignoreSpaces')?.addEventListener('change', () => {
+        rotationStepsSlots = 0;
+        updateDialRotation();
         updateResultDisplay();
+        updateMarkerHint();
+      });
+      document.getElementById('ignoreStar')?.addEventListener('change', () => {
+        rotationStepsSlots = 0;
+        updateDialRotation();
+        updateResultDisplay();
+        updateMarkerHint();
       });
     }
 
