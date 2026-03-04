@@ -537,6 +537,8 @@
       return '—';
     }
 
+    const DIAL_TRANSITION_MS = 500;
+
     function runOperations(opsText) {
       const re = /([RL])\s*(\d+)/gi;
       const ops = [];
@@ -547,7 +549,7 @@
       const hits = [];
 
       function advanceOneTick(dir) {
-        const delta = dir === 'R' ? 1 : -1; // dial rotation direction
+        const delta = dir === 'R' ? 1 : -1;
         let guard = 0;
         while (guard < TOTAL_SLOTS + 2) {
           rotationStepsSlots += delta;
@@ -557,18 +559,40 @@
         }
       }
 
-      for (const { dir, n } of ops) {
+      function applyOneOp(dir, n) {
         if (getIgnoreSpaces()) {
           for (let i = 0; i < n; i++) advanceOneTick(dir);
         } else {
           rotationStepsSlots += (dir === 'R' ? n : -n);
         }
-        const slot = SLOTS_DATA[slotIndexAtPointer()];
-        hits.push({ op: dir + n, hit: formatHit(slot) });
       }
-      updateDialRotation();
-      updateResultDisplay();
-      renderHitsLog(hits);
+
+      if (ops.length === 0) {
+        updateResultDisplay();
+        renderHitsLog([]);
+        return;
+      }
+
+      let index = 0;
+      function runNext() {
+        if (index >= ops.length) {
+          updateResultDisplay();
+          renderHitsLog(hits);
+          return;
+        }
+        const { dir, n } = ops[index];
+        applyOneOp(dir, n);
+        updateDialRotation();
+        index++;
+        setTimeout(() => {
+          const slot = SLOTS_DATA[slotIndexAtPointer()];
+          hits.push({ op: dir + n, hit: formatHit(slot) });
+          updateResultDisplay();
+          renderHitsLog(hits);
+          runNext();
+        }, DIAL_TRANSITION_MS + 50);
+      }
+      runNext();
     }
 
     function renderHitsLog(hits) {
