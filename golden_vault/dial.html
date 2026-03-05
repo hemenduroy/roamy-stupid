@@ -711,9 +711,11 @@
         lettersEl.textContent = '—';
         return;
       }
-      const indices = hits.map(({ slot }) => slot && slot.type === 'tick' ? String(slot.index) : '·');
-      const nums = hits.map(({ slot }) => slot && slot.type === 'tick' ? String(slot.num) : '·');
-      const letters = hits.map(({ slot }) => slot && slot.type === 'tick' ? slot.letter : (slot && slot.type === 'star' ? '★' : '·'));
+      const starChar = '★';
+      const gapChar = '·';
+      const indices = hits.map(({ slot }) => slot && slot.type === 'tick' ? String(slot.index) : (slot && slot.type === 'star' ? starChar : gapChar));
+      const nums = hits.map(({ slot }) => slot && slot.type === 'tick' ? String(slot.num) : (slot && slot.type === 'star' ? starChar : gapChar));
+      const letters = hits.map(({ slot }) => slot && slot.type === 'tick' ? slot.letter : (slot && slot.type === 'star' ? starChar : gapChar));
       indicesEl.textContent = indices.join(' ');
       numsEl.textContent = nums.join(' ');
       lettersEl.textContent = letters.join(' ');
