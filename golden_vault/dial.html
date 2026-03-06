@@ -58,6 +58,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      cursor: grab;
+      user-select: none;
+    }
+    .dial-container:active {
+      cursor: grabbing;
     }
 
     .dial {
@@ -110,9 +115,9 @@
 
     .dial-pointer {
       position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translate(-50%, -50%) rotate(90deg);
+      left: 50%;
+      top: 0;
+      transform: translate(-50%, -50%) rotate(180deg);
       width: 0;
       height: 0;
       border-left: 8px solid transparent;
@@ -288,16 +293,17 @@
       font-weight: 500;
       letter-spacing: 0.05em;
       margin-right: 8px;
+      min-width: 4.5em;
     }
 
     .vault-hits-row span:not(.vault-hits-label) {
-      margin-right: 0.25em;
+      margin-right: 0.35em;
     }
 
     .slot {
       position: absolute;
-      width: 12px;
-      height: 12px;
+      width: 14px;
+      height: 14px;
       /* transform with rotation set inline for radial alignment */
       display: flex;
       flex-direction: column;
@@ -310,6 +316,8 @@
     }
 
     .slot.tick {
+      width: 16px;
+      height: 20px;
       border-radius: 4px;
       background: rgba(12, 16, 28, 0.95);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -343,13 +351,24 @@
       color: var(--muted);
     }
 
-    /* number outer (first), letter inner (second) — both point toward center */
+    /* tick number (1–134), dial number, letter — all point toward center */
+    .slot .tick-idx {
+      font-size: 5px;
+      font-weight: 600;
+      color: var(--muted);
+      order: 0;
+      line-height: 1;
+      opacity: 0.9;
+    }
+
     .slot .num {
-      font-size: 7px;
+      font-size: 8px;
       font-weight: 700;
       color: var(--accent);
       margin-bottom: 0;
       order: 1;
+      line-height: 1;
+      text-shadow: 0 0 6px rgba(255, 200, 87, 0.5);
     }
 
     .slot .letter {
@@ -357,6 +376,7 @@
       font-weight: 600;
       color: var(--fg);
       order: 2;
+      line-height: 1;
     }
 
     .info {
@@ -409,13 +429,13 @@
 <body>
   <a class="back-link" href="../index.html">← Back to Roamy Stupid</a>
   <h2>Golden Vault Dial</h2>
-  <div class="subtitle">134 numbered positions around the lock, each with a letter; star at 9&nbsp;o&rsquo;clock.</div>
+  <div class="subtitle">134 numbered positions around the lock, each with a letter; star at 12&nbsp;o&rsquo;clock.</div>
 
   <div class="main-row">
     <div class="dial-container">
       <div id="dial" class="dial">
         <div id="dialRing" class="dial-ring"></div>
-        <div class="dial-pointer" title="Reading position (9 o&rsquo;clock)"></div>
+        <div class="dial-pointer" title="Reading position (12 o&rsquo;clock)"></div>
         <div class="center-cap"></div>
       </div>
     </div>
@@ -423,13 +443,13 @@
     <div class="vault-ops">
     <h3>Check combination</h3>
     <div class="vault-ops-toggle">
-      <input type="checkbox" id="ignoreSpaces" />
+      <input type="checkbox" id="ignoreSpaces" checked />
       <label for="ignoreSpaces">Ignore spaces</label>
       <input type="checkbox" id="ignoreStar" />
       <label for="ignoreStar">Ignore star</label>
     </div>
     <div class="vault-ops-row marker-row">
-      <label for="markerTick">Position at 9&nbsp;o&rsquo;clock when reset:</label>
+      <label for="markerTick">Position at 12&nbsp;o&rsquo;clock when reset:</label>
       <input
         type="number"
         id="markerTick"
@@ -447,7 +467,7 @@
     <div class="vault-hits-log" id="vaultHitsLog">
       <h4>Hits (each step)</h4>
       <div class="vault-hits-rows" id="vaultHitsList">
-        <div class="vault-hits-row"><span class="vault-hits-label">Index</span> <span id="vaultHitsIndices"></span></div>
+        <div class="vault-hits-row"><span class="vault-hits-label">Tick</span> <span id="vaultHitsTicks"></span></div>
         <div class="vault-hits-row"><span class="vault-hits-label">Numbers</span> <span id="vaultHitsNums"></span></div>
         <div class="vault-hits-row"><span class="vault-hits-label">Letters</span> <span id="vaultHitsLetters"></span></div>
       </div>
@@ -459,7 +479,7 @@
 
   <div class="info">
     Each tick on the rim is one of the 134 numbers from <code>dial.txt</code>, paired with its letter from the matching word.
-    The star at 9&nbsp;o&rsquo;clock has three empty slots above and below it; the remaining slots are filled clockwise
+    The star at 12&nbsp;o&rsquo;clock has three empty slots above and below it; the remaining slots are filled clockwise
     with the 134 (number, letter) pairs in order.
   </div>
 
@@ -485,12 +505,12 @@
     const GAP_EACH_SIDE = 3;
     const STAR_INDEX = 0;
     const TOTAL_SLOTS = TOTAL_SEGMENTS + 1 + GAP_EACH_SIDE * 2; // 141
-    // Star and pointer both at 9 o'clock (180°). Layout: angle(pos) = 180 + 360*pos/141.
+    // Star and pointer both at 12 o'clock (90°). Layout: angle(pos) = 90 + 360*pos/141.
     const TICK_103_AT_6OCLOCK = 103;
     const SLOT_INDEX_OF_TICK_103 = 4 + (TICK_103_AT_6OCLOCK - 1); // 106
     const FIRST_TICK_SLOT = 4;
     const TICK_INDEX_AT_6OCLOCK = SLOT_INDEX_OF_TICK_103 - FIRST_TICK_SLOT; // 102
-    const NINE_OCLOCK_DEG = 180;
+    const NINE_OCLOCK_DEG = 270; // 12 o'clock (screen Y down: 270° = top)
     const DEG_PER_SLOT = 360 / TOTAL_SLOTS;
 
     function buildSlots() {
@@ -579,7 +599,7 @@
       return countedSlots[idx];
     }
 
-    // Slot at 9 o'clock = markerSlotAtRest when rotation is 0; then shifts by -rotationStepsSlots per step.
+    // Slot at 12 o'clock = markerSlotAtRest when rotation is 0; then shifts by -rotationStepsSlots per step.
     function slotIndexAtPointer() {
       const markerAtRest = getMarkerSlotAtRest();
       const effective = ((rotationStepsSlots % TOTAL_SLOTS) + TOTAL_SLOTS) % TOTAL_SLOTS;
@@ -701,22 +721,22 @@
     }
 
     function renderHitsLog(hits) {
-      const indicesEl = document.getElementById('vaultHitsIndices');
+      const ticksEl = document.getElementById('vaultHitsTicks') || document.getElementById('vaultHitsIndices');
       const numsEl = document.getElementById('vaultHitsNums');
       const lettersEl = document.getElementById('vaultHitsLetters');
-      if (!indicesEl || !numsEl || !lettersEl) return;
+      if (!numsEl || !lettersEl) return;
       if (hits.length === 0) {
-        indicesEl.textContent = '—';
+        if (ticksEl) ticksEl.textContent = '—';
         numsEl.textContent = '—';
         lettersEl.textContent = '—';
         return;
       }
       const starChar = '★';
       const gapChar = '·';
-      const indices = hits.map(({ slot }) => slot && slot.type === 'tick' ? String(slot.index) : (slot && slot.type === 'star' ? starChar : gapChar));
+      const ticks = hits.map(({ slot }) => slot && slot.type === 'tick' ? String(slot.index) : (slot && slot.type === 'star' ? starChar : gapChar));
       const nums = hits.map(({ slot }) => slot && slot.type === 'tick' ? String(slot.num) : (slot && slot.type === 'star' ? starChar : gapChar));
       const letters = hits.map(({ slot }) => slot && slot.type === 'tick' ? slot.letter : (slot && slot.type === 'star' ? starChar : gapChar));
-      indicesEl.textContent = indices.join(' ');
+      if (ticksEl) ticksEl.textContent = ticks.join(' ');
       numsEl.textContent = nums.join(' ');
       lettersEl.textContent = letters.join(' ');
     }
@@ -749,13 +769,14 @@
         el.style.transform = `translate(-50%, -50%) rotate(${radialDeg}deg)`;
 
         if (slot.type === 'tick') {
+          const tickIdx = slot.index != null ? String(slot.index) : '';
           const num = slot.num !== undefined ? slot.num : '';
           const letter = slot.letter !== undefined && slot.letter !== null ? slot.letter : '';
-          el.innerHTML = `<div class="num">${num}</div><div class="letter">${letter}</div>`;
-          el.title = slot.index != null ? `#${slot.index}: ${num} → ${letter}` : `${num} → ${letter}`;
+          el.innerHTML = `<div class="tick-idx">${tickIdx}</div><div class="num">${num}</div><div class="letter">${letter}</div>`;
+          el.title = slot.index != null ? `Tick #${slot.index}: ${num} → ${letter}` : `${num} → ${letter}`;
         } else if (slot.type === 'star') {
           el.textContent = '★';
-          el.title = 'Dial origin (9 o\'clock)';
+          el.title = 'Dial origin (12 o\'clock)';
         } else if (slot.type === 'gap') {
           el.textContent = '·';
           el.title = 'Empty gap';
@@ -814,6 +835,45 @@
         updateResultDisplay();
         updateMarkerHint();
       });
+
+      // Manual spin: drag the dial to rotate (for testing)
+      const container = document.querySelector('.dial-container');
+      if (container) {
+        const SLOTS_PER_PX = 0.5;
+        let dragStartX = 0;
+        let dragStartRotation = 0;
+        let capturedPointerId = null;
+
+        function onPointerDown(e) {
+          if (e.button !== 0) return;
+          e.preventDefault();
+          dragStartX = e.clientX;
+          dragStartRotation = rotationStepsSlots;
+          capturedPointerId = e.pointerId;
+          if (container.setPointerCapture) container.setPointerCapture(e.pointerId);
+          document.addEventListener('pointermove', onPointerMove);
+          document.addEventListener('pointerup', onPointerUp);
+          document.addEventListener('pointercancel', onPointerUp);
+        }
+        function onPointerMove(e) {
+          const dx = e.clientX - dragStartX;
+          const dSlots = Math.round(dx * SLOTS_PER_PX);
+          rotationStepsSlots = dragStartRotation + dSlots;
+          updateDialRotation();
+          updateResultDisplay();
+        }
+        function onPointerUp(e) {
+          document.removeEventListener('pointermove', onPointerMove);
+          document.removeEventListener('pointerup', onPointerUp);
+          document.removeEventListener('pointercancel', onPointerUp);
+          if (capturedPointerId != null && container.releasePointerCapture) {
+            try { container.releasePointerCapture(capturedPointerId); } catch (_) {}
+            capturedPointerId = null;
+          }
+        }
+
+        container.addEventListener('pointerdown', onPointerDown);
+      }
     }
 
     window.addEventListener('load', renderDial);

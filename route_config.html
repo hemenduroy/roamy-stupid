@@ -354,7 +354,7 @@
 
       function clearHighlightClasses() {
         for (var r = 0; r < ROWS; r++) {
-          ['loc1', 'roamy', 'loc2'].forEach(function(pos) {
+            ['loc1', 'roamy', 'loc2'].forEach(function(pos) {
             var sel = document.getElementById(pos + '_' + r);
             if (sel) sel.classList.remove('confirmed', 'probable', 'speculative');
           });
